@@ -1,45 +1,49 @@
 <?php
 /**
- * PHP UTF-8 is a UTF-8 aware library of functions mirroring PHP's own string functions.
+ * PHP5 UTF-8 is a UTF-8 aware library of functions mirroring PHP's own string functions.
  *
  * The powerful solution/contribution for UTF-8 support in your framework/CMS, written on PHP.
  * This package is advance of http://sourceforge.net/projects/phputf8 (last updated in 2007).
  *
  * In Russian:
+ * 
  * Поддержка UTF-8 в PHP 5.
- * Набор (сборник, библиотека, склад, репозиторий) PHP функций для разработчиков веб-сайтов, использующих кодировку UTF-8
  *
  * Преимущества использования этого класса:
  *   * Совместимость с интерфейсом стандартных PHP функций, работающих с однобайтовыми кодировками
- *   * Возможность работы без PHP расширений ICONV и MBSTRING (если они есть, то активно используются)
+ *   * Возможность работы без PHP расширений ICONV и MBSTRING, если они есть, то активно используются!
  *   * Полезные функции, отсутствующие в ICONV и MBSTRING
  *   * Методы, которые принимают и возвращают строку, умеют принимать и возвращать null (удобно при выборках значений из базы данных)
+ *   * Несколько методов умеют обрабатывать массивы рекурсивно
  *   * Высокая производительность, надёжность и качественный код
  *   * PHP >= 5.3.x
+ *
+ * Example:
+ *   $s = 'Hello, Привет';
+ *   if (UTF8::is_utf8($s)) echo UTF8::strlen($s);
  *
  * Символы UTF-8 получаются из Unicode следующим образом:
  *   2^7   0x00000000 — 0x0000007F  0xxxxxxx
  *   2^11  0x00000080 — 0x000007FF  110xxxxx 10xxxxxx
  *   2^16  0x00000800 — 0x0000FFFF  1110xxxx 10xxxxxx 10xxxxxx
  *   2^21  0x00010000 — 0x001FFFFF  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
- *
- * 1-4 bytes length: 2^7 + 2^11 + 2^16 + 2^21 = 2 164 864
+ *   1-4 bytes length: 2^7 + 2^11 + 2^16 + 2^21 = 2 164 864
  *
  * Если бы я был повелителем мира, то оставил бы только 2 кодировки: UTF-8 и UTF-32 ;)
  *
- * TODO?
+ * Useful links
+ *   http://ru.wikipedia.org/wiki/UTF8
+ *   http://www.unicode.org/
  *   http://www.unicode.org/reports/
  *   http://www.unicode.org/reports/tr10/      Unicode Collation Algorithm
  *   http://www.unicode.org/Public/UCA/5.1.0/
  *   http://www.unicode.org/reports/tr6/       A Standard Compression Scheme for Unicode
+ *   http://www.fileformat.info/info/unicode/char/search.htm  Unicode Character Search
  *
- * @link     http://www.unicode.org/
- * @link     http://ru.wikipedia.org/wiki/UTF8
- * @link     http://www.fileformat.info/info/unicode/char/search.htm  Unicode Character Search
- *
+ * @link     http://code.google.com/p/php5-utf8/
  * @license  http://creativecommons.org/licenses/by-sa/3.0/
- * @author   Nasibullin Rinat: http://orangetie.ru/, http://rin-nas.moikrug.ru/
- * @version  2.1.2
+ * @author   Nasibullin Rinat
+ * @version  2.1.3
  */
 class UTF8
 {
