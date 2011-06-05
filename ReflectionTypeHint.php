@@ -16,7 +16,7 @@
  */
 class ReflectionTypeHint
 {
-	private static $hints = array(
+	protected static $hints = array(
 		'int'      => 'is_int',
 		'integer'  => 'is_int',
 		'digit'    => 'ctype_digit',

@@ -1,3 +1,13 @@
+2.2.0 / 2011-06-06
+
+	* UTF8::strlen(), UTF8::substr(), UTF8::strpos(),
+	  UTF8::html_entity_encode(), UTF8::html_entity_decode(),
+      UTF8::convert_case(), UTF8::lowercase(), UTF8::uppercase() speed improved
+	* UTF8::stripos(), UTF8::to_unicode(), UTF8::from_unicode() added
+	* UTF8::strtolower(), UTF8::strtoupper() as wrapper to UTF8::convert_case() added
+	* Unicode character database to 6.0.0 (2010-06-04) updated
+	* UTF8::$convert_case_table improved
+
 2.1.3 / 2011-05-31
 
 	* UTF8::truncate() small bug fixed

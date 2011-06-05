@@ -5,16 +5,29 @@
  * The powerful solution/contribution for UTF-8 support in your framework/CMS, written on PHP.
  * This package is advance of http://sourceforge.net/projects/phputf8 (last updated in 2007).
  *
+ * UTF-8 support in PHP 5.
+ *
+ * Features and benefits of using this class:
+ *   * Compatibility with the interface standard PHP functions that deal with single-byte encodings
+ *   * Ability to work without PHP extensions ICONV and MBSTRING, if any, that are actively used!
+ *   * Useful features are missing from the ICONV and MBSTRING
+ *   * The methods that take and return a string, are able to take and return null (useful for selects from a database)
+ *   * Several methods are able to process arrays recursively
+ *   * A single interface and encapsulation (you can inherit and override)
+ *   * High performance, reliability and quality code
+ *   * PHP> = 5.3.x
+ *
  * In Russian:
  * 
  * Поддержка UTF-8 в PHP 5.
  *
- * Преимущества использования этого класса:
+ * Возможности и преимущества использования этого класса:
  *   * Совместимость с интерфейсом стандартных PHP функций, работающих с однобайтовыми кодировками
  *   * Возможность работы без PHP расширений ICONV и MBSTRING, если они есть, то активно используются!
  *   * Полезные функции, отсутствующие в ICONV и MBSTRING
  *   * Методы, которые принимают и возвращают строку, умеют принимать и возвращать null (удобно при выборках значений из базы данных)
  *   * Несколько методов умеют обрабатывать массивы рекурсивно
+ *   * Единый интерфейс и инкапсуляция (можно унаследоваться и переопределить методы)
  *   * Высокая производительность, надёжность и качественный код
  *   * PHP >= 5.3.x
  *
@@ -33,17 +46,18 @@
  *
  * Useful links
  *   http://ru.wikipedia.org/wiki/UTF8
+ *   http://www.madore.org/~david/misc/unitest/   A Unicode Test Page
  *   http://www.unicode.org/
  *   http://www.unicode.org/reports/
  *   http://www.unicode.org/reports/tr10/      Unicode Collation Algorithm
- *   http://www.unicode.org/Public/UCA/5.1.0/
+ *   http://www.unicode.org/Public/UCA/6.0.0/  Unicode Collation Algorithm
  *   http://www.unicode.org/reports/tr6/       A Standard Compression Scheme for Unicode
  *   http://www.fileformat.info/info/unicode/char/search.htm  Unicode Character Search
  *
  * @link     http://code.google.com/p/php5-utf8/
  * @license  http://creativecommons.org/licenses/by-sa/3.0/
  * @author   Nasibullin Rinat
- * @version  2.1.3
+ * @version  2.2.0
  */
 class UTF8
 {
@@ -491,9 +505,17 @@ class UTF8
 		"\xff" => "\xd1\x8f",      #U+044f CYRILLIC SMALL LETTER YA
 	);
 
-	#таблица конвертации регистра
+	public static $convert_case_table_flipped;
+
+	/**
+	 * UTF-8 Case lookup table
+	 *
+	 * This lookuptable defines the upper case letters to their correspponding
+	 * lower case letter in UTF-8
+	 *
+	 * @author Andreas Gohr <andi@splitbrain.org>
+	 */
 	public static $convert_case_table = array(
-		#en (английский латиница)
 		#CASE_UPPER => case_lower
 		"\x41" => "\x61", #A a
 		"\x42" => "\x62", #B b
@@ -521,109 +543,639 @@ class UTF8
 		"\x58" => "\x78", #X x
 		"\x59" => "\x79", #Y y
 		"\x5a" => "\x7a", #Z z
-
-		#ru (русский кириллица)
-		#CASE_UPPER => case_lower
-		"\xd0\x81" => "\xd1\x91", #Ё ё
-		"\xd0\x90" => "\xd0\xb0", #А а
-		"\xd0\x91" => "\xd0\xb1", #Б б
-		"\xd0\x92" => "\xd0\xb2", #В в
-		"\xd0\x93" => "\xd0\xb3", #Г г
-		"\xd0\x94" => "\xd0\xb4", #Д д
-		"\xd0\x95" => "\xd0\xb5", #Е е
-		"\xd0\x96" => "\xd0\xb6", #Ж ж
-		"\xd0\x97" => "\xd0\xb7", #З з
-		"\xd0\x98" => "\xd0\xb8", #И и
-		"\xd0\x99" => "\xd0\xb9", #Й й
-		"\xd0\x9a" => "\xd0\xba", #К к
-		"\xd0\x9b" => "\xd0\xbb", #Л л
-		"\xd0\x9c" => "\xd0\xbc", #М м
-		"\xd0\x9d" => "\xd0\xbd", #Н н
-		"\xd0\x9e" => "\xd0\xbe", #О о
-		"\xd0\x9f" => "\xd0\xbf", #П п
-
-		#CASE_UPPER => case_lower
-		"\xd0\xa0" => "\xd1\x80", #Р р
-		"\xd0\xa1" => "\xd1\x81", #С с
-		"\xd0\xa2" => "\xd1\x82", #Т т
-		"\xd0\xa3" => "\xd1\x83", #У у
-		"\xd0\xa4" => "\xd1\x84", #Ф ф
-		"\xd0\xa5" => "\xd1\x85", #Х х
-		"\xd0\xa6" => "\xd1\x86", #Ц ц
-		"\xd0\xa7" => "\xd1\x87", #Ч ч
-		"\xd0\xa8" => "\xd1\x88", #Ш ш
-		"\xd0\xa9" => "\xd1\x89", #Щ щ
-		"\xd0\xaa" => "\xd1\x8a", #Ъ ъ
-		"\xd0\xab" => "\xd1\x8b", #Ы ы
-		"\xd0\xac" => "\xd1\x8c", #Ь ь
-		"\xd0\xad" => "\xd1\x8d", #Э э
-		"\xd0\xae" => "\xd1\x8e", #Ю ю
-		"\xd0\xaf" => "\xd1\x8f", #Я я
-
-		#tt (татарский, башкирский кириллица)
-		#CASE_UPPER => case_lower
-		"\xd2\x96" => "\xd2\x97", #Ж ж с хвостиком    &#1174; => &#1175;
-		"\xd2\xa2" => "\xd2\xa3", #Н н с хвостиком    &#1186; => &#1187;
-		"\xd2\xae" => "\xd2\xaf", #Y y                &#1198; => &#1199;
-		"\xd2\xba" => "\xd2\xbb", #h h мягкое         &#1210; => &#1211;
-		"\xd3\x98" => "\xd3\x99", #Э э                &#1240; => &#1241;
-		"\xd3\xa8" => "\xd3\xa9", #О o перечеркнутое  &#1256; => &#1257;
-
-		#uk (украинский кириллица)
-		#CASE_UPPER => case_lower
-		"\xd2\x90" => "\xd2\x91",  #г с хвостиком
-		"\xd0\x84" => "\xd1\x94",  #э зеркальное отражение
-		"\xd0\x86" => "\xd1\x96",  #и с одной точкой
-		"\xd0\x87" => "\xd1\x97",  #и с двумя точками
-
-		#be (белорусский кириллица)
-		#CASE_UPPER => case_lower
-		"\xd0\x8e" => "\xd1\x9e",  #у с подковой над буквой
-
-		#tr,de,es (турецкий, немецкий, испанский, французский латиница)
-		#CASE_UPPER => case_lower
-		"\xc3\x84" => "\xc3\xa4", #a умляут          &#196; => &#228;  (турецкий)
-		"\xc3\x87" => "\xc3\xa7", #c с хвостиком     &#199; => &#231;  (турецкий, французский)
-		"\xc3\x91" => "\xc3\xb1", #n с тильдой       &#209; => &#241;  (турецкий, испанский)
-		"\xc3\x96" => "\xc3\xb6", #o умляут          &#214; => &#246;  (турецкий)
-		"\xc3\x9c" => "\xc3\xbc", #u умляут          &#220; => &#252;  (турецкий, французский)
-		"\xc4\x9e" => "\xc4\x9f", #g умляут          &#286; => &#287;  (турецкий)
-		"\xc4\xb0" => "\xc4\xb1", #i c точкой и без  &#304; => &#305;  (турецкий)
-		"\xc5\x9e" => "\xc5\x9f", #s с хвостиком     &#350; => &#351;  (турецкий)
-
-		#hr (хорватский латиница)
-		#CASE_UPPER => case_lower
-		"\xc4\x8c" => "\xc4\x8d",  #c с подковой над буквой
-		"\xc4\x86" => "\xc4\x87",  #c с ударением
-		"\xc4\x90" => "\xc4\x91",  #d перечеркнутое
-		"\xc5\xa0" => "\xc5\xa1",  #s с подковой над буквой
-		"\xc5\xbd" => "\xc5\xbe",  #z с подковой над буквой
-
-		#fr (французский латиница)
-		#CASE_UPPER => case_lower
-		"\xc3\x80" => "\xc3\xa0",  #a с ударением в др. сторону
-		"\xc3\x82" => "\xc3\xa2",  #a с крышкой
-		"\xc3\x86" => "\xc3\xa6",  #ae совмещенное
-		"\xc3\x88" => "\xc3\xa8",  #e с ударением в др. сторону
-		"\xc3\x89" => "\xc3\xa9",  #e с ударением
-		"\xc3\x8a" => "\xc3\xaa",  #e с крышкой
-		"\xc3\x8b" => "\xc3\xab",  #ё
-		"\xc3\x8e" => "\xc3\xae",  #i с крышкой
-		"\xc3\x8f" => "\xc3\xaf",  #i умляут
-		"\xc3\x94" => "\xc3\xb4",  #o с крышкой
-		"\xc5\x92" => "\xc5\x93",  #ce совмещенное
-		"\xc3\x99" => "\xc3\xb9",  #u с ударением в др. сторону
-		"\xc3\x9b" => "\xc3\xbb",  #u с крышкой
-		"\xc5\xb8" => "\xc3\xbf",  #y умляут
-
-		#xx (другой язык)
-		#CASE_UPPER => case_lower
-		#"" => "",  #
-
+		"\xc3\x80" => "\xc3\xa0",
+		"\xc3\x81" => "\xc3\xa1",
+		"\xc3\x82" => "\xc3\xa2",
+		"\xc3\x83" => "\xc3\xa3",
+		"\xc3\x84" => "\xc3\xa4",
+		"\xc3\x85" => "\xc3\xa5",
+		"\xc3\x86" => "\xc3\xa6",
+		"\xc3\x87" => "\xc3\xa7",
+		"\xc3\x88" => "\xc3\xa8",
+		"\xc3\x89" => "\xc3\xa9",
+		"\xc3\x8a" => "\xc3\xaa",
+		"\xc3\x8b" => "\xc3\xab",
+		"\xc3\x8c" => "\xc3\xac",
+		"\xc3\x8d" => "\xc3\xad",
+		"\xc3\x8e" => "\xc3\xae",
+		"\xc3\x8f" => "\xc3\xaf",
+		"\xc3\x90" => "\xc3\xb0",
+		"\xc3\x91" => "\xc3\xb1",
+		"\xc3\x92" => "\xc3\xb2",
+		"\xc3\x93" => "\xc3\xb3",
+		"\xc3\x94" => "\xc3\xb4",
+		"\xc3\x95" => "\xc3\xb5",
+		"\xc3\x96" => "\xc3\xb6",
+		"\xc3\x98" => "\xc3\xb8",
+		"\xc3\x99" => "\xc3\xb9",
+		"\xc3\x9a" => "\xc3\xba",
+		"\xc3\x9b" => "\xc3\xbb",
+		"\xc3\x9c" => "\xc3\xbc",
+		"\xc3\x9d" => "\xc3\xbd",
+		"\xc3\x9e" => "\xc3\xbe",
+		"\xc4\x80" => "\xc4\x81",
+		"\xc4\x82" => "\xc4\x83",
+		"\xc4\x84" => "\xc4\x85",
+		"\xc4\x86" => "\xc4\x87",
+		"\xc4\x88" => "\xc4\x89",
+		"\xc4\x8a" => "\xc4\x8b",
+		"\xc4\x8c" => "\xc4\x8d",
+		"\xc4\x8e" => "\xc4\x8f",
+		"\xc4\x90" => "\xc4\x91",
+		"\xc4\x92" => "\xc4\x93",
+		"\xc4\x94" => "\xc4\x95",
+		"\xc4\x96" => "\xc4\x97",
+		"\xc4\x98" => "\xc4\x99",
+		"\xc4\x9a" => "\xc4\x9b",
+		"\xc4\x9c" => "\xc4\x9d",
+		"\xc4\x9e" => "\xc4\x9f",
+		"\xc4\xa0" => "\xc4\xa1",
+		"\xc4\xa2" => "\xc4\xa3",
+		"\xc4\xa4" => "\xc4\xa5",
+		"\xc4\xa6" => "\xc4\xa7",
+		"\xc4\xa8" => "\xc4\xa9",
+		"\xc4\xaa" => "\xc4\xab",
+		"\xc4\xac" => "\xc4\xad",
+		"\xc4\xae" => "\xc4\xaf",
+		"\xc4\xb2" => "\xc4\xb3",
+		"\xc4\xb4" => "\xc4\xb5",
+		"\xc4\xb6" => "\xc4\xb7",
+		"\xc4\xb9" => "\xc4\xba",
+		"\xc4\xbb" => "\xc4\xbc",
+		"\xc4\xbd" => "\xc4\xbe",
+		"\xc4\xbf" => "\xc5\x80",
+		"\xc5\x81" => "\xc5\x82",
+		"\xc5\x83" => "\xc5\x84",
+		"\xc5\x85" => "\xc5\x86",
+		"\xc5\x87" => "\xc5\x88",
+		"\xc5\x8a" => "\xc5\x8b",
+		"\xc5\x8c" => "\xc5\x8d",
+		"\xc5\x8e" => "\xc5\x8f",
+		"\xc5\x90" => "\xc5\x91",
+		"\xc5\x92" => "\xc5\x93",
+		"\xc5\x94" => "\xc5\x95",
+		"\xc5\x96" => "\xc5\x97",
+		"\xc5\x98" => "\xc5\x99",
+		"\xc5\x9a" => "\xc5\x9b",
+		"\xc5\x9c" => "\xc5\x9d",
+		"\xc5\x9e" => "\xc5\x9f",
+		"\xc5\xa0" => "\xc5\xa1",
+		"\xc5\xa2" => "\xc5\xa3",
+		"\xc5\xa4" => "\xc5\xa5",
+		"\xc5\xa6" => "\xc5\xa7",
+		"\xc5\xa8" => "\xc5\xa9",
+		"\xc5\xaa" => "\xc5\xab",
+		"\xc5\xac" => "\xc5\xad",
+		"\xc5\xae" => "\xc5\xaf",
+		"\xc5\xb0" => "\xc5\xb1",
+		"\xc5\xb2" => "\xc5\xb3",
+		"\xc5\xb4" => "\xc5\xb5",
+		"\xc5\xb6" => "\xc5\xb7",
+		"\xc5\xb8" => "\xc3\xbf",
+		"\xc5\xb9" => "\xc5\xba",
+		"\xc5\xbb" => "\xc5\xbc",
+		"\xc5\xbd" => "\xc5\xbe",
+		"\xc6\x81" => "\xc9\x93",
+		"\xc6\x82" => "\xc6\x83",
+		"\xc6\x84" => "\xc6\x85",
+		"\xc6\x86" => "\xc9\x94",
+		"\xc6\x87" => "\xc6\x88",
+		"\xc6\x89" => "\xc9\x96",
+		"\xc6\x8a" => "\xc9\x97",
+		"\xc6\x8b" => "\xc6\x8c",
+		"\xc6\x8e" => "\xc7\x9d",
+		"\xc6\x8f" => "\xc9\x99",
+		"\xc6\x90" => "\xc9\x9b",
+		"\xc6\x91" => "\xc6\x92",
+		"\xc6\x94" => "\xc9\xa3",
+		"\xc6\x96" => "\xc9\xa9",
+		"\xc6\x97" => "\xc9\xa8",
+		"\xc6\x98" => "\xc6\x99",
+		"\xc6\x9c" => "\xc9\xaf",
+		"\xc6\x9d" => "\xc9\xb2",
+		"\xc6\x9f" => "\xc9\xb5",
+		"\xc6\xa0" => "\xc6\xa1",
+		"\xc6\xa2" => "\xc6\xa3",
+		"\xc6\xa4" => "\xc6\xa5",
+		"\xc6\xa6" => "\xca\x80",
+		"\xc6\xa7" => "\xc6\xa8",
+		"\xc6\xa9" => "\xca\x83",
+		"\xc6\xac" => "\xc6\xad",
+		"\xc6\xae" => "\xca\x88",
+		"\xc6\xaf" => "\xc6\xb0",
+		"\xc6\xb1" => "\xca\x8a",
+		"\xc6\xb2" => "\xca\x8b",
+		"\xc6\xb3" => "\xc6\xb4",
+		"\xc6\xb5" => "\xc6\xb6",
+		"\xc6\xb7" => "\xca\x92",
+		"\xc6\xb8" => "\xc6\xb9",
+		"\xc6\xbc" => "\xc6\xbd",
+		"\xc7\x85" => "\xc7\x86",
+		"\xc7\x88" => "\xc7\x89",
+		"\xc7\x8b" => "\xc7\x8c",
+		"\xc7\x8d" => "\xc7\x8e",
+		"\xc7\x8f" => "\xc7\x90",
+		"\xc7\x91" => "\xc7\x92",
+		"\xc7\x93" => "\xc7\x94",
+		"\xc7\x95" => "\xc7\x96",
+		"\xc7\x97" => "\xc7\x98",
+		"\xc7\x99" => "\xc7\x9a",
+		"\xc7\x9b" => "\xc7\x9c",
+		"\xc7\x9e" => "\xc7\x9f",
+		"\xc7\xa0" => "\xc7\xa1",
+		"\xc7\xa2" => "\xc7\xa3",
+		"\xc7\xa4" => "\xc7\xa5",
+		"\xc7\xa6" => "\xc7\xa7",
+		"\xc7\xa8" => "\xc7\xa9",
+		"\xc7\xaa" => "\xc7\xab",
+		"\xc7\xac" => "\xc7\xad",
+		"\xc7\xae" => "\xc7\xaf",
+		"\xc7\xb2" => "\xc7\xb3",
+		"\xc7\xb4" => "\xc7\xb5",
+		"\xc7\xb6" => "\xc6\x95",
+		"\xc7\xb7" => "\xc6\xbf",
+		"\xc7\xb8" => "\xc7\xb9",
+		"\xc7\xba" => "\xc7\xbb",
+		"\xc7\xbc" => "\xc7\xbd",
+		"\xc7\xbe" => "\xc7\xbf",
+		"\xc8\x80" => "\xc8\x81",
+		"\xc8\x82" => "\xc8\x83",
+		"\xc8\x84" => "\xc8\x85",
+		"\xc8\x86" => "\xc8\x87",
+		"\xc8\x88" => "\xc8\x89",
+		"\xc8\x8a" => "\xc8\x8b",
+		"\xc8\x8c" => "\xc8\x8d",
+		"\xc8\x8e" => "\xc8\x8f",
+		"\xc8\x90" => "\xc8\x91",
+		"\xc8\x92" => "\xc8\x93",
+		"\xc8\x94" => "\xc8\x95",
+		"\xc8\x96" => "\xc8\x97",
+		"\xc8\x98" => "\xc8\x99",
+		"\xc8\x9a" => "\xc8\x9b",
+		"\xc8\x9c" => "\xc8\x9d",
+		"\xc8\x9e" => "\xc8\x9f",
+		"\xc8\xa0" => "\xc6\x9e",
+		"\xc8\xa2" => "\xc8\xa3",
+		"\xc8\xa4" => "\xc8\xa5",
+		"\xc8\xa6" => "\xc8\xa7",
+		"\xc8\xa8" => "\xc8\xa9",
+		"\xc8\xaa" => "\xc8\xab",
+		"\xc8\xac" => "\xc8\xad",
+		"\xc8\xae" => "\xc8\xaf",
+		"\xc8\xb0" => "\xc8\xb1",
+		"\xc8\xb2" => "\xc8\xb3",
+		"\xce\x86" => "\xce\xac",
+		"\xce\x88" => "\xce\xad",
+		"\xce\x89" => "\xce\xae",
+		"\xce\x8a" => "\xce\xaf",
+		"\xce\x8c" => "\xcf\x8c",
+		"\xce\x8e" => "\xcf\x8d",
+		"\xce\x8f" => "\xcf\x8e",
+		"\xce\x91" => "\xce\xb1",
+		"\xce\x92" => "\xce\xb2",
+		"\xce\x93" => "\xce\xb3",
+		"\xce\x94" => "\xce\xb4",
+		"\xce\x95" => "\xce\xb5",
+		"\xce\x96" => "\xce\xb6",
+		"\xce\x97" => "\xce\xb7",
+		"\xce\x98" => "\xce\xb8",
+		"\xce\x99" => "\xce\xb9",
+		"\xce\x9a" => "\xce\xba",
+		"\xce\x9b" => "\xce\xbb",
+		"\xce\x9c" => "\xc2\xb5",
+		"\xce\x9d" => "\xce\xbd",
+		"\xce\x9e" => "\xce\xbe",
+		"\xce\x9f" => "\xce\xbf",
+		"\xce\xa0" => "\xcf\x80",
+		"\xce\xa1" => "\xcf\x81",
+		"\xce\xa3" => "\xcf\x82",
+		"\xce\xa4" => "\xcf\x84",
+		"\xce\xa5" => "\xcf\x85",
+		"\xce\xa6" => "\xcf\x86",
+		"\xce\xa7" => "\xcf\x87",
+		"\xce\xa8" => "\xcf\x88",
+		"\xce\xa9" => "\xcf\x89",
+		"\xce\xaa" => "\xcf\x8a",
+		"\xce\xab" => "\xcf\x8b",
+		"\xcf\x98" => "\xcf\x99",
+		"\xcf\x9a" => "\xcf\x9b",
+		"\xcf\x9c" => "\xcf\x9d",
+		"\xcf\x9e" => "\xcf\x9f",
+		"\xcf\xa0" => "\xcf\xa1",
+		"\xcf\xa2" => "\xcf\xa3",
+		"\xcf\xa4" => "\xcf\xa5",
+		"\xcf\xa6" => "\xcf\xa7",
+		"\xcf\xa8" => "\xcf\xa9",
+		"\xcf\xaa" => "\xcf\xab",
+		"\xcf\xac" => "\xcf\xad",
+		"\xcf\xae" => "\xcf\xaf",
+		"\xd0\x80" => "\xd1\x90",
+		"\xd0\x81" => "\xd1\x91",
+		"\xd0\x82" => "\xd1\x92",
+		"\xd0\x83" => "\xd1\x93",
+		"\xd0\x84" => "\xd1\x94",
+		"\xd0\x85" => "\xd1\x95",
+		"\xd0\x86" => "\xd1\x96",
+		"\xd0\x87" => "\xd1\x97",
+		"\xd0\x88" => "\xd1\x98",
+		"\xd0\x89" => "\xd1\x99",
+		"\xd0\x8a" => "\xd1\x9a",
+		"\xd0\x8b" => "\xd1\x9b",
+		"\xd0\x8c" => "\xd1\x9c",
+		"\xd0\x8d" => "\xd1\x9d",
+		"\xd0\x8e" => "\xd1\x9e",
+		"\xd0\x8f" => "\xd1\x9f",
+		"\xd0\x90" => "\xd0\xb0",
+		"\xd0\x91" => "\xd0\xb1",
+		"\xd0\x92" => "\xd0\xb2",
+		"\xd0\x93" => "\xd0\xb3",
+		"\xd0\x94" => "\xd0\xb4",
+		"\xd0\x95" => "\xd0\xb5",
+		"\xd0\x96" => "\xd0\xb6",
+		"\xd0\x97" => "\xd0\xb7",
+		"\xd0\x98" => "\xd0\xb8",
+		"\xd0\x99" => "\xd0\xb9",
+		"\xd0\x9a" => "\xd0\xba",
+		"\xd0\x9b" => "\xd0\xbb",
+		"\xd0\x9c" => "\xd0\xbc",
+		"\xd0\x9d" => "\xd0\xbd",
+		"\xd0\x9e" => "\xd0\xbe",
+		"\xd0\x9f" => "\xd0\xbf",
+		"\xd0\xa0" => "\xd1\x80",
+		"\xd0\xa1" => "\xd1\x81",
+		"\xd0\xa2" => "\xd1\x82",
+		"\xd0\xa3" => "\xd1\x83",
+		"\xd0\xa4" => "\xd1\x84",
+		"\xd0\xa5" => "\xd1\x85",
+		"\xd0\xa6" => "\xd1\x86",
+		"\xd0\xa7" => "\xd1\x87",
+		"\xd0\xa8" => "\xd1\x88",
+		"\xd0\xa9" => "\xd1\x89",
+		"\xd0\xaa" => "\xd1\x8a",
+		"\xd0\xab" => "\xd1\x8b",
+		"\xd0\xac" => "\xd1\x8c",
+		"\xd0\xad" => "\xd1\x8d",
+		"\xd0\xae" => "\xd1\x8e",
+		"\xd0\xaf" => "\xd1\x8f",
+		"\xd1\xa0" => "\xd1\xa1",
+		"\xd1\xa2" => "\xd1\xa3",
+		"\xd1\xa4" => "\xd1\xa5",
+		"\xd1\xa6" => "\xd1\xa7",
+		"\xd1\xa8" => "\xd1\xa9",
+		"\xd1\xaa" => "\xd1\xab",
+		"\xd1\xac" => "\xd1\xad",
+		"\xd1\xae" => "\xd1\xaf",
+		"\xd1\xb0" => "\xd1\xb1",
+		"\xd1\xb2" => "\xd1\xb3",
+		"\xd1\xb4" => "\xd1\xb5",
+		"\xd1\xb6" => "\xd1\xb7",
+		"\xd1\xb8" => "\xd1\xb9",
+		"\xd1\xba" => "\xd1\xbb",
+		"\xd1\xbc" => "\xd1\xbd",
+		"\xd1\xbe" => "\xd1\xbf",
+		"\xd2\x80" => "\xd2\x81",
+		"\xd2\x8a" => "\xd2\x8b",
+		"\xd2\x8c" => "\xd2\x8d",
+		"\xd2\x8e" => "\xd2\x8f",
+		"\xd2\x90" => "\xd2\x91",
+		"\xd2\x92" => "\xd2\x93",
+		"\xd2\x94" => "\xd2\x95",
+		"\xd2\x96" => "\xd2\x97",
+		"\xd2\x98" => "\xd2\x99",
+		"\xd2\x9a" => "\xd2\x9b",
+		"\xd2\x9c" => "\xd2\x9d",
+		"\xd2\x9e" => "\xd2\x9f",
+		"\xd2\xa0" => "\xd2\xa1",
+		"\xd2\xa2" => "\xd2\xa3",
+		"\xd2\xa4" => "\xd2\xa5",
+		"\xd2\xa6" => "\xd2\xa7",
+		"\xd2\xa8" => "\xd2\xa9",
+		"\xd2\xaa" => "\xd2\xab",
+		"\xd2\xac" => "\xd2\xad",
+		"\xd2\xae" => "\xd2\xaf",
+		"\xd2\xb0" => "\xd2\xb1",
+		"\xd2\xb2" => "\xd2\xb3",
+		"\xd2\xb4" => "\xd2\xb5",
+		"\xd2\xb6" => "\xd2\xb7",
+		"\xd2\xb8" => "\xd2\xb9",
+		"\xd2\xba" => "\xd2\xbb",
+		"\xd2\xbc" => "\xd2\xbd",
+		"\xd2\xbe" => "\xd2\xbf",
+		"\xd3\x81" => "\xd3\x82",
+		"\xd3\x83" => "\xd3\x84",
+		"\xd3\x85" => "\xd3\x86",
+		"\xd3\x87" => "\xd3\x88",
+		"\xd3\x89" => "\xd3\x8a",
+		"\xd3\x8b" => "\xd3\x8c",
+		"\xd3\x8d" => "\xd3\x8e",
+		"\xd3\x90" => "\xd3\x91",
+		"\xd3\x92" => "\xd3\x93",
+		"\xd3\x94" => "\xd3\x95",
+		"\xd3\x96" => "\xd3\x97",
+		"\xd3\x98" => "\xd3\x99",
+		"\xd3\x9a" => "\xd3\x9b",
+		"\xd3\x9c" => "\xd3\x9d",
+		"\xd3\x9e" => "\xd3\x9f",
+		"\xd3\xa0" => "\xd3\xa1",
+		"\xd3\xa2" => "\xd3\xa3",
+		"\xd3\xa4" => "\xd3\xa5",
+		"\xd3\xa6" => "\xd3\xa7",
+		"\xd3\xa8" => "\xd3\xa9",
+		"\xd3\xaa" => "\xd3\xab",
+		"\xd3\xac" => "\xd3\xad",
+		"\xd3\xae" => "\xd3\xaf",
+		"\xd3\xb0" => "\xd3\xb1",
+		"\xd3\xb2" => "\xd3\xb3",
+		"\xd3\xb4" => "\xd3\xb5",
+		"\xd3\xb8" => "\xd3\xb9",
+		"\xd4\x80" => "\xd4\x81",
+		"\xd4\x82" => "\xd4\x83",
+		"\xd4\x84" => "\xd4\x85",
+		"\xd4\x86" => "\xd4\x87",
+		"\xd4\x88" => "\xd4\x89",
+		"\xd4\x8a" => "\xd4\x8b",
+		"\xd4\x8c" => "\xd4\x8d",
+		"\xd4\x8e" => "\xd4\x8f",
+		"\xd4\xb1" => "\xd5\xa1",
+		"\xd4\xb2" => "\xd5\xa2",
+		"\xd4\xb3" => "\xd5\xa3",
+		"\xd4\xb4" => "\xd5\xa4",
+		"\xd4\xb5" => "\xd5\xa5",
+		"\xd4\xb6" => "\xd5\xa6",
+		"\xd4\xb7" => "\xd5\xa7",
+		"\xd4\xb8" => "\xd5\xa8",
+		"\xd4\xb9" => "\xd5\xa9",
+		"\xd4\xba" => "\xd5\xaa",
+		"\xd4\xbb" => "\xd5\xab",
+		"\xd4\xbc" => "\xd5\xac",
+		"\xd4\xbd" => "\xd5\xad",
+		"\xd4\xbe" => "\xd5\xae",
+		"\xd4\xbf" => "\xd5\xaf",
+		"\xd5\x80" => "\xd5\xb0",
+		"\xd5\x81" => "\xd5\xb1",
+		"\xd5\x82" => "\xd5\xb2",
+		"\xd5\x83" => "\xd5\xb3",
+		"\xd5\x84" => "\xd5\xb4",
+		"\xd5\x85" => "\xd5\xb5",
+		"\xd5\x86" => "\xd5\xb6",
+		"\xd5\x87" => "\xd5\xb7",
+		"\xd5\x88" => "\xd5\xb8",
+		"\xd5\x89" => "\xd5\xb9",
+		"\xd5\x8a" => "\xd5\xba",
+		"\xd5\x8b" => "\xd5\xbb",
+		"\xd5\x8c" => "\xd5\xbc",
+		"\xd5\x8d" => "\xd5\xbd",
+		"\xd5\x8e" => "\xd5\xbe",
+		"\xd5\x8f" => "\xd5\xbf",
+		"\xd5\x90" => "\xd6\x80",
+		"\xd5\x91" => "\xd6\x81",
+		"\xd5\x92" => "\xd6\x82",
+		"\xd5\x93" => "\xd6\x83",
+		"\xd5\x94" => "\xd6\x84",
+		"\xd5\x95" => "\xd6\x85",
+		"\xd5\x96" => "\xd6\x86",
+		"\xe1\xb8\x80" => "\xe1\xb8\x81",
+		"\xe1\xb8\x82" => "\xe1\xb8\x83",
+		"\xe1\xb8\x84" => "\xe1\xb8\x85",
+		"\xe1\xb8\x86" => "\xe1\xb8\x87",
+		"\xe1\xb8\x88" => "\xe1\xb8\x89",
+		"\xe1\xb8\x8a" => "\xe1\xb8\x8b",
+		"\xe1\xb8\x8c" => "\xe1\xb8\x8d",
+		"\xe1\xb8\x8e" => "\xe1\xb8\x8f",
+		"\xe1\xb8\x90" => "\xe1\xb8\x91",
+		"\xe1\xb8\x92" => "\xe1\xb8\x93",
+		"\xe1\xb8\x94" => "\xe1\xb8\x95",
+		"\xe1\xb8\x96" => "\xe1\xb8\x97",
+		"\xe1\xb8\x98" => "\xe1\xb8\x99",
+		"\xe1\xb8\x9a" => "\xe1\xb8\x9b",
+		"\xe1\xb8\x9c" => "\xe1\xb8\x9d",
+		"\xe1\xb8\x9e" => "\xe1\xb8\x9f",
+		"\xe1\xb8\xa0" => "\xe1\xb8\xa1",
+		"\xe1\xb8\xa2" => "\xe1\xb8\xa3",
+		"\xe1\xb8\xa4" => "\xe1\xb8\xa5",
+		"\xe1\xb8\xa6" => "\xe1\xb8\xa7",
+		"\xe1\xb8\xa8" => "\xe1\xb8\xa9",
+		"\xe1\xb8\xaa" => "\xe1\xb8\xab",
+		"\xe1\xb8\xac" => "\xe1\xb8\xad",
+		"\xe1\xb8\xae" => "\xe1\xb8\xaf",
+		"\xe1\xb8\xb0" => "\xe1\xb8\xb1",
+		"\xe1\xb8\xb2" => "\xe1\xb8\xb3",
+		"\xe1\xb8\xb4" => "\xe1\xb8\xb5",
+		"\xe1\xb8\xb6" => "\xe1\xb8\xb7",
+		"\xe1\xb8\xb8" => "\xe1\xb8\xb9",
+		"\xe1\xb8\xba" => "\xe1\xb8\xbb",
+		"\xe1\xb8\xbc" => "\xe1\xb8\xbd",
+		"\xe1\xb8\xbe" => "\xe1\xb8\xbf",
+		"\xe1\xb9\x80" => "\xe1\xb9\x81",
+		"\xe1\xb9\x82" => "\xe1\xb9\x83",
+		"\xe1\xb9\x84" => "\xe1\xb9\x85",
+		"\xe1\xb9\x86" => "\xe1\xb9\x87",
+		"\xe1\xb9\x88" => "\xe1\xb9\x89",
+		"\xe1\xb9\x8a" => "\xe1\xb9\x8b",
+		"\xe1\xb9\x8c" => "\xe1\xb9\x8d",
+		"\xe1\xb9\x8e" => "\xe1\xb9\x8f",
+		"\xe1\xb9\x90" => "\xe1\xb9\x91",
+		"\xe1\xb9\x92" => "\xe1\xb9\x93",
+		"\xe1\xb9\x94" => "\xe1\xb9\x95",
+		"\xe1\xb9\x96" => "\xe1\xb9\x97",
+		"\xe1\xb9\x98" => "\xe1\xb9\x99",
+		"\xe1\xb9\x9a" => "\xe1\xb9\x9b",
+		"\xe1\xb9\x9c" => "\xe1\xb9\x9d",
+		"\xe1\xb9\x9e" => "\xe1\xb9\x9f",
+		"\xe1\xb9\xa0" => "\xe1\xb9\xa1",
+		"\xe1\xb9\xa2" => "\xe1\xb9\xa3",
+		"\xe1\xb9\xa4" => "\xe1\xb9\xa5",
+		"\xe1\xb9\xa6" => "\xe1\xb9\xa7",
+		"\xe1\xb9\xa8" => "\xe1\xb9\xa9",
+		"\xe1\xb9\xaa" => "\xe1\xb9\xab",
+		"\xe1\xb9\xac" => "\xe1\xb9\xad",
+		"\xe1\xb9\xae" => "\xe1\xb9\xaf",
+		"\xe1\xb9\xb0" => "\xe1\xb9\xb1",
+		"\xe1\xb9\xb2" => "\xe1\xb9\xb3",
+		"\xe1\xb9\xb4" => "\xe1\xb9\xb5",
+		"\xe1\xb9\xb6" => "\xe1\xb9\xb7",
+		"\xe1\xb9\xb8" => "\xe1\xb9\xb9",
+		"\xe1\xb9\xba" => "\xe1\xb9\xbb",
+		"\xe1\xb9\xbc" => "\xe1\xb9\xbd",
+		"\xe1\xb9\xbe" => "\xe1\xb9\xbf",
+		"\xe1\xba\x80" => "\xe1\xba\x81",
+		"\xe1\xba\x82" => "\xe1\xba\x83",
+		"\xe1\xba\x84" => "\xe1\xba\x85",
+		"\xe1\xba\x86" => "\xe1\xba\x87",
+		"\xe1\xba\x88" => "\xe1\xba\x89",
+		"\xe1\xba\x8a" => "\xe1\xba\x8b",
+		"\xe1\xba\x8c" => "\xe1\xba\x8d",
+		"\xe1\xba\x8e" => "\xe1\xba\x8f",
+		"\xe1\xba\x90" => "\xe1\xba\x91",
+		"\xe1\xba\x92" => "\xe1\xba\x93",
+		"\xe1\xba\x94" => "\xe1\xba\x95",
+		"\xe1\xba\xa0" => "\xe1\xba\xa1",
+		"\xe1\xba\xa2" => "\xe1\xba\xa3",
+		"\xe1\xba\xa4" => "\xe1\xba\xa5",
+		"\xe1\xba\xa6" => "\xe1\xba\xa7",
+		"\xe1\xba\xa8" => "\xe1\xba\xa9",
+		"\xe1\xba\xaa" => "\xe1\xba\xab",
+		"\xe1\xba\xac" => "\xe1\xba\xad",
+		"\xe1\xba\xae" => "\xe1\xba\xaf",
+		"\xe1\xba\xb0" => "\xe1\xba\xb1",
+		"\xe1\xba\xb2" => "\xe1\xba\xb3",
+		"\xe1\xba\xb4" => "\xe1\xba\xb5",
+		"\xe1\xba\xb6" => "\xe1\xba\xb7",
+		"\xe1\xba\xb8" => "\xe1\xba\xb9",
+		"\xe1\xba\xba" => "\xe1\xba\xbb",
+		"\xe1\xba\xbc" => "\xe1\xba\xbd",
+		"\xe1\xba\xbe" => "\xe1\xba\xbf",
+		"\xe1\xbb\x80" => "\xe1\xbb\x81",
+		"\xe1\xbb\x82" => "\xe1\xbb\x83",
+		"\xe1\xbb\x84" => "\xe1\xbb\x85",
+		"\xe1\xbb\x86" => "\xe1\xbb\x87",
+		"\xe1\xbb\x88" => "\xe1\xbb\x89",
+		"\xe1\xbb\x8a" => "\xe1\xbb\x8b",
+		"\xe1\xbb\x8c" => "\xe1\xbb\x8d",
+		"\xe1\xbb\x8e" => "\xe1\xbb\x8f",
+		"\xe1\xbb\x90" => "\xe1\xbb\x91",
+		"\xe1\xbb\x92" => "\xe1\xbb\x93",
+		"\xe1\xbb\x94" => "\xe1\xbb\x95",
+		"\xe1\xbb\x96" => "\xe1\xbb\x97",
+		"\xe1\xbb\x98" => "\xe1\xbb\x99",
+		"\xe1\xbb\x9a" => "\xe1\xbb\x9b",
+		"\xe1\xbb\x9c" => "\xe1\xbb\x9d",
+		"\xe1\xbb\x9e" => "\xe1\xbb\x9f",
+		"\xe1\xbb\xa0" => "\xe1\xbb\xa1",
+		"\xe1\xbb\xa2" => "\xe1\xbb\xa3",
+		"\xe1\xbb\xa4" => "\xe1\xbb\xa5",
+		"\xe1\xbb\xa6" => "\xe1\xbb\xa7",
+		"\xe1\xbb\xa8" => "\xe1\xbb\xa9",
+		"\xe1\xbb\xaa" => "\xe1\xbb\xab",
+		"\xe1\xbb\xac" => "\xe1\xbb\xad",
+		"\xe1\xbb\xae" => "\xe1\xbb\xaf",
+		"\xe1\xbb\xb0" => "\xe1\xbb\xb1",
+		"\xe1\xbb\xb2" => "\xe1\xbb\xb3",
+		"\xe1\xbb\xb4" => "\xe1\xbb\xb5",
+		"\xe1\xbb\xb6" => "\xe1\xbb\xb7",
+		"\xe1\xbb\xb8" => "\xe1\xbb\xb9",
+		"\xe1\xbc\x88" => "\xe1\xbc\x80",
+		"\xe1\xbc\x89" => "\xe1\xbc\x81",
+		"\xe1\xbc\x8a" => "\xe1\xbc\x82",
+		"\xe1\xbc\x8b" => "\xe1\xbc\x83",
+		"\xe1\xbc\x8c" => "\xe1\xbc\x84",
+		"\xe1\xbc\x8d" => "\xe1\xbc\x85",
+		"\xe1\xbc\x8e" => "\xe1\xbc\x86",
+		"\xe1\xbc\x8f" => "\xe1\xbc\x87",
+		"\xe1\xbc\x98" => "\xe1\xbc\x90",
+		"\xe1\xbc\x99" => "\xe1\xbc\x91",
+		"\xe1\xbc\x9a" => "\xe1\xbc\x92",
+		"\xe1\xbc\x9b" => "\xe1\xbc\x93",
+		"\xe1\xbc\x9c" => "\xe1\xbc\x94",
+		"\xe1\xbc\x9d" => "\xe1\xbc\x95",
+		"\xe1\xbc\xa9" => "\xe1\xbc\xa1",
+		"\xe1\xbc\xaa" => "\xe1\xbc\xa2",
+		"\xe1\xbc\xab" => "\xe1\xbc\xa3",
+		"\xe1\xbc\xac" => "\xe1\xbc\xa4",
+		"\xe1\xbc\xad" => "\xe1\xbc\xa5",
+		"\xe1\xbc\xae" => "\xe1\xbc\xa6",
+		"\xe1\xbc\xaf" => "\xe1\xbc\xa7",
+		"\xe1\xbc\xb8" => "\xe1\xbc\xb0",
+		"\xe1\xbc\xb9" => "\xe1\xbc\xb1",
+		"\xe1\xbc\xba" => "\xe1\xbc\xb2",
+		"\xe1\xbc\xbb" => "\xe1\xbc\xb3",
+		"\xe1\xbc\xbc" => "\xe1\xbc\xb4",
+		"\xe1\xbc\xbd" => "\xe1\xbc\xb5",
+		"\xe1\xbc\xbe" => "\xe1\xbc\xb6",
+		"\xe1\xbc\xbf" => "\xe1\xbc\xb7",
+		"\xe1\xbd\x88" => "\xe1\xbd\x80",
+		"\xe1\xbd\x89" => "\xe1\xbd\x81",
+		"\xe1\xbd\x8a" => "\xe1\xbd\x82",
+		"\xe1\xbd\x8b" => "\xe1\xbd\x83",
+		"\xe1\xbd\x8c" => "\xe1\xbd\x84",
+		"\xe1\xbd\x8d" => "\xe1\xbd\x85",
+		"\xe1\xbd\x99" => "\xe1\xbd\x91",
+		"\xe1\xbd\x9b" => "\xe1\xbd\x93",
+		"\xe1\xbd\x9d" => "\xe1\xbd\x95",
+		"\xe1\xbd\x9f" => "\xe1\xbd\x97",
+		"\xe1\xbd\xa9" => "\xe1\xbd\xa1",
+		"\xe1\xbd\xaa" => "\xe1\xbd\xa2",
+		"\xe1\xbd\xab" => "\xe1\xbd\xa3",
+		"\xe1\xbd\xac" => "\xe1\xbd\xa4",
+		"\xe1\xbd\xad" => "\xe1\xbd\xa5",
+		"\xe1\xbd\xae" => "\xe1\xbd\xa6",
+		"\xe1\xbd\xaf" => "\xe1\xbd\xa7",
+		"\xe1\xbe\x88" => "\xe1\xbe\x80",
+		"\xe1\xbe\x89" => "\xe1\xbe\x81",
+		"\xe1\xbe\x8a" => "\xe1\xbe\x82",
+		"\xe1\xbe\x8b" => "\xe1\xbe\x83",
+		"\xe1\xbe\x8c" => "\xe1\xbe\x84",
+		"\xe1\xbe\x8d" => "\xe1\xbe\x85",
+		"\xe1\xbe\x8e" => "\xe1\xbe\x86",
+		"\xe1\xbe\x8f" => "\xe1\xbe\x87",
+		"\xe1\xbe\x98" => "\xe1\xbe\x90",
+		"\xe1\xbe\x99" => "\xe1\xbe\x91",
+		"\xe1\xbe\x9a" => "\xe1\xbe\x92",
+		"\xe1\xbe\x9b" => "\xe1\xbe\x93",
+		"\xe1\xbe\x9c" => "\xe1\xbe\x94",
+		"\xe1\xbe\x9d" => "\xe1\xbe\x95",
+		"\xe1\xbe\x9e" => "\xe1\xbe\x96",
+		"\xe1\xbe\x9f" => "\xe1\xbe\x97",
+		"\xe1\xbe\xa9" => "\xe1\xbe\xa1",
+		"\xe1\xbe\xaa" => "\xe1\xbe\xa2",
+		"\xe1\xbe\xab" => "\xe1\xbe\xa3",
+		"\xe1\xbe\xac" => "\xe1\xbe\xa4",
+		"\xe1\xbe\xad" => "\xe1\xbe\xa5",
+		"\xe1\xbe\xae" => "\xe1\xbe\xa6",
+		"\xe1\xbe\xaf" => "\xe1\xbe\xa7",
+		"\xe1\xbe\xb8" => "\xe1\xbe\xb0",
+		"\xe1\xbe\xb9" => "\xe1\xbe\xb1",
+		"\xe1\xbe\xba" => "\xe1\xbd\xb0",
+		"\xe1\xbe\xbb" => "\xe1\xbd\xb1",
+		"\xe1\xbe\xbc" => "\xe1\xbe\xb3",
+		"\xe1\xbf\x88" => "\xe1\xbd\xb2",
+		"\xe1\xbf\x89" => "\xe1\xbd\xb3",
+		"\xe1\xbf\x8a" => "\xe1\xbd\xb4",
+		"\xe1\xbf\x8b" => "\xe1\xbd\xb5",
+		"\xe1\xbf\x8c" => "\xe1\xbf\x83",
+		"\xe1\xbf\x98" => "\xe1\xbf\x90",
+		"\xe1\xbf\x99" => "\xe1\xbf\x91",
+		"\xe1\xbf\x9a" => "\xe1\xbd\xb6",
+		"\xe1\xbf\x9b" => "\xe1\xbd\xb7",
+		"\xe1\xbf\xa9" => "\xe1\xbf\xa1",
+		"\xe1\xbf\xaa" => "\xe1\xbd\xba",
+		"\xe1\xbf\xab" => "\xe1\xbd\xbb",
+		"\xe1\xbf\xac" => "\xe1\xbf\xa5",
+		"\xe1\xbf\xb8" => "\xe1\xbd\xb8",
+		"\xe1\xbf\xb9" => "\xe1\xbd\xb9",
+		"\xe1\xbf\xba" => "\xe1\xbd\xbc",
+		"\xe1\xbf\xbb" => "\xe1\xbd\xbd",
+		"\xe1\xbf\xbc" => "\xe1\xbf\xb3",
+		"\xef\xbc\xa1" => "\xef\xbd\x81",
+		"\xef\xbc\xa2" => "\xef\xbd\x82",
+		"\xef\xbc\xa3" => "\xef\xbd\x83",
+		"\xef\xbc\xa4" => "\xef\xbd\x84",
+		"\xef\xbc\xa5" => "\xef\xbd\x85",
+		"\xef\xbc\xa6" => "\xef\xbd\x86",
+		"\xef\xbc\xa7" => "\xef\xbd\x87",
+		"\xef\xbc\xa8" => "\xef\xbd\x88",
+		"\xef\xbc\xa9" => "\xef\xbd\x89",
+		"\xef\xbc\xaa" => "\xef\xbd\x8a",
+		"\xef\xbc\xab" => "\xef\xbd\x8b",
+		"\xef\xbc\xac" => "\xef\xbd\x8c",
+		"\xef\xbc\xad" => "\xef\xbd\x8d",
+		"\xef\xbc\xae" => "\xef\xbd\x8e",
+		"\xef\xbc\xaf" => "\xef\xbd\x8f",
+		"\xef\xbc\xb0" => "\xef\xbd\x90",
+		"\xef\xbc\xb1" => "\xef\xbd\x91",
+		"\xef\xbc\xb2" => "\xef\xbd\x92",
+		"\xef\xbc\xb3" => "\xef\xbd\x93",
+		"\xef\xbc\xb4" => "\xef\xbd\x94",
+		"\xef\xbc\xb5" => "\xef\xbd\x95",
+		"\xef\xbc\xb6" => "\xef\xbd\x96",
+		"\xef\xbc\xb7" => "\xef\xbd\x97",
+		"\xef\xbc\xb8" => "\xef\xbd\x98",
+		"\xef\xbc\xb9" => "\xef\xbd\x99",
+		"\xef\xbc\xba" => "\xef\xbd\x9a",
 	);
 
-	#Unicode Character Database 5.2.0
-	#autogenerated by unicode_blocks_txt2php() PHP function at 2010-06-16 14:46:00, 197 blocks total
+	#Unicode Character Database 6.0.0 (2010-06-04)
+	#autogenerated by unicode_blocks_txt2php() PHP function at 2011-06-04 00:19:39, 209 blocks total
 	public static $unicode_blocks = array(
 		'Basic Latin' => array(
 			0 => 0x0000,
@@ -715,900 +1267,960 @@ class UTF8
 			1 => 0x083F,
 			2 => 17,
 		),
+		'Mandaic' => array(
+			0 => 0x0840,
+			1 => 0x085F,
+			2 => 18,
+		),
 		'Devanagari' => array(
 			0 => 0x0900,
 			1 => 0x097F,
-			2 => 18,
+			2 => 19,
 		),
 		'Bengali' => array(
 			0 => 0x0980,
 			1 => 0x09FF,
-			2 => 19,
+			2 => 20,
 		),
 		'Gurmukhi' => array(
 			0 => 0x0A00,
 			1 => 0x0A7F,
-			2 => 20,
+			2 => 21,
 		),
 		'Gujarati' => array(
 			0 => 0x0A80,
 			1 => 0x0AFF,
-			2 => 21,
+			2 => 22,
 		),
 		'Oriya' => array(
 			0 => 0x0B00,
 			1 => 0x0B7F,
-			2 => 22,
+			2 => 23,
 		),
 		'Tamil' => array(
 			0 => 0x0B80,
 			1 => 0x0BFF,
-			2 => 23,
+			2 => 24,
 		),
 		'Telugu' => array(
 			0 => 0x0C00,
 			1 => 0x0C7F,
-			2 => 24,
+			2 => 25,
 		),
 		'Kannada' => array(
 			0 => 0x0C80,
 			1 => 0x0CFF,
-			2 => 25,
+			2 => 26,
 		),
 		'Malayalam' => array(
 			0 => 0x0D00,
 			1 => 0x0D7F,
-			2 => 26,
+			2 => 27,
 		),
 		'Sinhala' => array(
 			0 => 0x0D80,
 			1 => 0x0DFF,
-			2 => 27,
+			2 => 28,
 		),
 		'Thai' => array(
 			0 => 0x0E00,
 			1 => 0x0E7F,
-			2 => 28,
+			2 => 29,
 		),
 		'Lao' => array(
 			0 => 0x0E80,
 			1 => 0x0EFF,
-			2 => 29,
+			2 => 30,
 		),
 		'Tibetan' => array(
 			0 => 0x0F00,
 			1 => 0x0FFF,
-			2 => 30,
+			2 => 31,
 		),
 		'Myanmar' => array(
 			0 => 0x1000,
 			1 => 0x109F,
-			2 => 31,
+			2 => 32,
 		),
 		'Georgian' => array(
 			0 => 0x10A0,
 			1 => 0x10FF,
-			2 => 32,
+			2 => 33,
 		),
 		'Hangul Jamo' => array(
 			0 => 0x1100,
 			1 => 0x11FF,
-			2 => 33,
+			2 => 34,
 		),
 		'Ethiopic' => array(
 			0 => 0x1200,
 			1 => 0x137F,
-			2 => 34,
+			2 => 35,
 		),
 		'Ethiopic Supplement' => array(
 			0 => 0x1380,
 			1 => 0x139F,
-			2 => 35,
+			2 => 36,
 		),
 		'Cherokee' => array(
 			0 => 0x13A0,
 			1 => 0x13FF,
-			2 => 36,
+			2 => 37,
 		),
 		'Unified Canadian Aboriginal Syllabics' => array(
 			0 => 0x1400,
 			1 => 0x167F,
-			2 => 37,
+			2 => 38,
 		),
 		'Ogham' => array(
 			0 => 0x1680,
 			1 => 0x169F,
-			2 => 38,
+			2 => 39,
 		),
 		'Runic' => array(
 			0 => 0x16A0,
 			1 => 0x16FF,
-			2 => 39,
+			2 => 40,
 		),
 		'Tagalog' => array(
 			0 => 0x1700,
 			1 => 0x171F,
-			2 => 40,
+			2 => 41,
 		),
 		'Hanunoo' => array(
 			0 => 0x1720,
 			1 => 0x173F,
-			2 => 41,
+			2 => 42,
 		),
 		'Buhid' => array(
 			0 => 0x1740,
 			1 => 0x175F,
-			2 => 42,
+			2 => 43,
 		),
 		'Tagbanwa' => array(
 			0 => 0x1760,
 			1 => 0x177F,
-			2 => 43,
+			2 => 44,
 		),
 		'Khmer' => array(
 			0 => 0x1780,
 			1 => 0x17FF,
-			2 => 44,
+			2 => 45,
 		),
 		'Mongolian' => array(
 			0 => 0x1800,
 			1 => 0x18AF,
-			2 => 45,
+			2 => 46,
 		),
 		'Unified Canadian Aboriginal Syllabics Extended' => array(
 			0 => 0x18B0,
 			1 => 0x18FF,
-			2 => 46,
+			2 => 47,
 		),
 		'Limbu' => array(
 			0 => 0x1900,
 			1 => 0x194F,
-			2 => 47,
+			2 => 48,
 		),
 		'Tai Le' => array(
 			0 => 0x1950,
 			1 => 0x197F,
-			2 => 48,
+			2 => 49,
 		),
 		'New Tai Lue' => array(
 			0 => 0x1980,
 			1 => 0x19DF,
-			2 => 49,
+			2 => 50,
 		),
 		'Khmer Symbols' => array(
 			0 => 0x19E0,
 			1 => 0x19FF,
-			2 => 50,
+			2 => 51,
 		),
 		'Buginese' => array(
 			0 => 0x1A00,
 			1 => 0x1A1F,
-			2 => 51,
+			2 => 52,
 		),
 		'Tai Tham' => array(
 			0 => 0x1A20,
 			1 => 0x1AAF,
-			2 => 52,
+			2 => 53,
 		),
 		'Balinese' => array(
 			0 => 0x1B00,
 			1 => 0x1B7F,
-			2 => 53,
+			2 => 54,
 		),
 		'Sundanese' => array(
 			0 => 0x1B80,
 			1 => 0x1BBF,
-			2 => 54,
+			2 => 55,
+		),
+		'Batak' => array(
+			0 => 0x1BC0,
+			1 => 0x1BFF,
+			2 => 56,
 		),
 		'Lepcha' => array(
 			0 => 0x1C00,
 			1 => 0x1C4F,
-			2 => 55,
+			2 => 57,
 		),
 		'Ol Chiki' => array(
 			0 => 0x1C50,
 			1 => 0x1C7F,
-			2 => 56,
+			2 => 58,
 		),
 		'Vedic Extensions' => array(
 			0 => 0x1CD0,
 			1 => 0x1CFF,
-			2 => 57,
+			2 => 59,
 		),
 		'Phonetic Extensions' => array(
 			0 => 0x1D00,
 			1 => 0x1D7F,
-			2 => 58,
+			2 => 60,
 		),
 		'Phonetic Extensions Supplement' => array(
 			0 => 0x1D80,
 			1 => 0x1DBF,
-			2 => 59,
+			2 => 61,
 		),
 		'Combining Diacritical Marks Supplement' => array(
 			0 => 0x1DC0,
 			1 => 0x1DFF,
-			2 => 60,
+			2 => 62,
 		),
 		'Latin Extended Additional' => array(
 			0 => 0x1E00,
 			1 => 0x1EFF,
-			2 => 61,
+			2 => 63,
 		),
 		'Greek Extended' => array(
 			0 => 0x1F00,
 			1 => 0x1FFF,
-			2 => 62,
+			2 => 64,
 		),
 		'General Punctuation' => array(
 			0 => 0x2000,
 			1 => 0x206F,
-			2 => 63,
+			2 => 65,
 		),
 		'Superscripts and Subscripts' => array(
 			0 => 0x2070,
 			1 => 0x209F,
-			2 => 64,
+			2 => 66,
 		),
 		'Currency Symbols' => array(
 			0 => 0x20A0,
 			1 => 0x20CF,
-			2 => 65,
+			2 => 67,
 		),
 		'Combining Diacritical Marks for Symbols' => array(
 			0 => 0x20D0,
 			1 => 0x20FF,
-			2 => 66,
+			2 => 68,
 		),
 		'Letterlike Symbols' => array(
 			0 => 0x2100,
 			1 => 0x214F,
-			2 => 67,
+			2 => 69,
 		),
 		'Number Forms' => array(
 			0 => 0x2150,
 			1 => 0x218F,
-			2 => 68,
+			2 => 70,
 		),
 		'Arrows' => array(
 			0 => 0x2190,
 			1 => 0x21FF,
-			2 => 69,
+			2 => 71,
 		),
 		'Mathematical Operators' => array(
 			0 => 0x2200,
 			1 => 0x22FF,
-			2 => 70,
+			2 => 72,
 		),
 		'Miscellaneous Technical' => array(
 			0 => 0x2300,
 			1 => 0x23FF,
-			2 => 71,
+			2 => 73,
 		),
 		'Control Pictures' => array(
 			0 => 0x2400,
 			1 => 0x243F,
-			2 => 72,
+			2 => 74,
 		),
 		'Optical Character Recognition' => array(
 			0 => 0x2440,
 			1 => 0x245F,
-			2 => 73,
+			2 => 75,
 		),
 		'Enclosed Alphanumerics' => array(
 			0 => 0x2460,
 			1 => 0x24FF,
-			2 => 74,
+			2 => 76,
 		),
 		'Box Drawing' => array(
 			0 => 0x2500,
 			1 => 0x257F,
-			2 => 75,
+			2 => 77,
 		),
 		'Block Elements' => array(
 			0 => 0x2580,
 			1 => 0x259F,
-			2 => 76,
+			2 => 78,
 		),
 		'Geometric Shapes' => array(
 			0 => 0x25A0,
 			1 => 0x25FF,
-			2 => 77,
+			2 => 79,
 		),
 		'Miscellaneous Symbols' => array(
 			0 => 0x2600,
 			1 => 0x26FF,
-			2 => 78,
+			2 => 80,
 		),
 		'Dingbats' => array(
 			0 => 0x2700,
 			1 => 0x27BF,
-			2 => 79,
+			2 => 81,
 		),
 		'Miscellaneous Mathematical Symbols-A' => array(
 			0 => 0x27C0,
 			1 => 0x27EF,
-			2 => 80,
+			2 => 82,
 		),
 		'Supplemental Arrows-A' => array(
 			0 => 0x27F0,
 			1 => 0x27FF,
-			2 => 81,
+			2 => 83,
 		),
 		'Braille Patterns' => array(
 			0 => 0x2800,
 			1 => 0x28FF,
-			2 => 82,
+			2 => 84,
 		),
 		'Supplemental Arrows-B' => array(
 			0 => 0x2900,
 			1 => 0x297F,
-			2 => 83,
+			2 => 85,
 		),
 		'Miscellaneous Mathematical Symbols-B' => array(
 			0 => 0x2980,
 			1 => 0x29FF,
-			2 => 84,
+			2 => 86,
 		),
 		'Supplemental Mathematical Operators' => array(
 			0 => 0x2A00,
 			1 => 0x2AFF,
-			2 => 85,
+			2 => 87,
 		),
 		'Miscellaneous Symbols and Arrows' => array(
 			0 => 0x2B00,
 			1 => 0x2BFF,
-			2 => 86,
+			2 => 88,
 		),
 		'Glagolitic' => array(
 			0 => 0x2C00,
 			1 => 0x2C5F,
-			2 => 87,
+			2 => 89,
 		),
 		'Latin Extended-C' => array(
 			0 => 0x2C60,
 			1 => 0x2C7F,
-			2 => 88,
+			2 => 90,
 		),
 		'Coptic' => array(
 			0 => 0x2C80,
 			1 => 0x2CFF,
-			2 => 89,
+			2 => 91,
 		),
 		'Georgian Supplement' => array(
 			0 => 0x2D00,
 			1 => 0x2D2F,
-			2 => 90,
+			2 => 92,
 		),
 		'Tifinagh' => array(
 			0 => 0x2D30,
 			1 => 0x2D7F,
-			2 => 91,
+			2 => 93,
 		),
 		'Ethiopic Extended' => array(
 			0 => 0x2D80,
 			1 => 0x2DDF,
-			2 => 92,
+			2 => 94,
 		),
 		'Cyrillic Extended-A' => array(
 			0 => 0x2DE0,
 			1 => 0x2DFF,
-			2 => 93,
+			2 => 95,
 		),
 		'Supplemental Punctuation' => array(
 			0 => 0x2E00,
 			1 => 0x2E7F,
-			2 => 94,
+			2 => 96,
 		),
 		'CJK Radicals Supplement' => array(
 			0 => 0x2E80,
 			1 => 0x2EFF,
-			2 => 95,
+			2 => 97,
 		),
 		'Kangxi Radicals' => array(
 			0 => 0x2F00,
 			1 => 0x2FDF,
-			2 => 96,
+			2 => 98,
 		),
 		'Ideographic Description Characters' => array(
 			0 => 0x2FF0,
 			1 => 0x2FFF,
-			2 => 97,
+			2 => 99,
 		),
 		'CJK Symbols and Punctuation' => array(
 			0 => 0x3000,
 			1 => 0x303F,
-			2 => 98,
+			2 => 100,
 		),
 		'Hiragana' => array(
 			0 => 0x3040,
 			1 => 0x309F,
-			2 => 99,
+			2 => 101,
 		),
 		'Katakana' => array(
 			0 => 0x30A0,
 			1 => 0x30FF,
-			2 => 100,
+			2 => 102,
 		),
 		'Bopomofo' => array(
 			0 => 0x3100,
 			1 => 0x312F,
-			2 => 101,
+			2 => 103,
 		),
 		'Hangul Compatibility Jamo' => array(
 			0 => 0x3130,
 			1 => 0x318F,
-			2 => 102,
+			2 => 104,
 		),
 		'Kanbun' => array(
 			0 => 0x3190,
 			1 => 0x319F,
-			2 => 103,
+			2 => 105,
 		),
 		'Bopomofo Extended' => array(
 			0 => 0x31A0,
 			1 => 0x31BF,
-			2 => 104,
+			2 => 106,
 		),
 		'CJK Strokes' => array(
 			0 => 0x31C0,
 			1 => 0x31EF,
-			2 => 105,
+			2 => 107,
 		),
 		'Katakana Phonetic Extensions' => array(
 			0 => 0x31F0,
 			1 => 0x31FF,
-			2 => 106,
+			2 => 108,
 		),
 		'Enclosed CJK Letters and Months' => array(
 			0 => 0x3200,
 			1 => 0x32FF,
-			2 => 107,
+			2 => 109,
 		),
 		'CJK Compatibility' => array(
 			0 => 0x3300,
 			1 => 0x33FF,
-			2 => 108,
+			2 => 110,
 		),
 		'CJK Unified Ideographs Extension A' => array(
 			0 => 0x3400,
 			1 => 0x4DBF,
-			2 => 109,
+			2 => 111,
 		),
 		'Yijing Hexagram Symbols' => array(
 			0 => 0x4DC0,
 			1 => 0x4DFF,
-			2 => 110,
+			2 => 112,
 		),
 		'CJK Unified Ideographs' => array(
 			0 => 0x4E00,
 			1 => 0x9FFF,
-			2 => 111,
+			2 => 113,
 		),
 		'Yi Syllables' => array(
 			0 => 0xA000,
 			1 => 0xA48F,
-			2 => 112,
+			2 => 114,
 		),
 		'Yi Radicals' => array(
 			0 => 0xA490,
 			1 => 0xA4CF,
-			2 => 113,
+			2 => 115,
 		),
 		'Lisu' => array(
 			0 => 0xA4D0,
 			1 => 0xA4FF,
-			2 => 114,
+			2 => 116,
 		),
 		'Vai' => array(
 			0 => 0xA500,
 			1 => 0xA63F,
-			2 => 115,
+			2 => 117,
 		),
 		'Cyrillic Extended-B' => array(
 			0 => 0xA640,
 			1 => 0xA69F,
-			2 => 116,
+			2 => 118,
 		),
 		'Bamum' => array(
 			0 => 0xA6A0,
 			1 => 0xA6FF,
-			2 => 117,
+			2 => 119,
 		),
 		'Modifier Tone Letters' => array(
 			0 => 0xA700,
 			1 => 0xA71F,
-			2 => 118,
+			2 => 120,
 		),
 		'Latin Extended-D' => array(
 			0 => 0xA720,
 			1 => 0xA7FF,
-			2 => 119,
+			2 => 121,
 		),
 		'Syloti Nagri' => array(
 			0 => 0xA800,
 			1 => 0xA82F,
-			2 => 120,
+			2 => 122,
 		),
 		'Common Indic Number Forms' => array(
 			0 => 0xA830,
 			1 => 0xA83F,
-			2 => 121,
+			2 => 123,
 		),
 		'Phags-pa' => array(
 			0 => 0xA840,
 			1 => 0xA87F,
-			2 => 122,
+			2 => 124,
 		),
 		'Saurashtra' => array(
 			0 => 0xA880,
 			1 => 0xA8DF,
-			2 => 123,
+			2 => 125,
 		),
 		'Devanagari Extended' => array(
 			0 => 0xA8E0,
 			1 => 0xA8FF,
-			2 => 124,
+			2 => 126,
 		),
 		'Kayah Li' => array(
 			0 => 0xA900,
 			1 => 0xA92F,
-			2 => 125,
+			2 => 127,
 		),
 		'Rejang' => array(
 			0 => 0xA930,
 			1 => 0xA95F,
-			2 => 126,
+			2 => 128,
 		),
 		'Hangul Jamo Extended-A' => array(
 			0 => 0xA960,
 			1 => 0xA97F,
-			2 => 127,
+			2 => 129,
 		),
 		'Javanese' => array(
 			0 => 0xA980,
 			1 => 0xA9DF,
-			2 => 128,
+			2 => 130,
 		),
 		'Cham' => array(
 			0 => 0xAA00,
 			1 => 0xAA5F,
-			2 => 129,
+			2 => 131,
 		),
 		'Myanmar Extended-A' => array(
 			0 => 0xAA60,
 			1 => 0xAA7F,
-			2 => 130,
+			2 => 132,
 		),
 		'Tai Viet' => array(
 			0 => 0xAA80,
 			1 => 0xAADF,
-			2 => 131,
+			2 => 133,
+		),
+		'Ethiopic Extended-A' => array(
+			0 => 0xAB00,
+			1 => 0xAB2F,
+			2 => 134,
 		),
 		'Meetei Mayek' => array(
 			0 => 0xABC0,
 			1 => 0xABFF,
-			2 => 132,
+			2 => 135,
 		),
 		'Hangul Syllables' => array(
 			0 => 0xAC00,
 			1 => 0xD7AF,
-			2 => 133,
+			2 => 136,
 		),
 		'Hangul Jamo Extended-B' => array(
 			0 => 0xD7B0,
 			1 => 0xD7FF,
-			2 => 134,
+			2 => 137,
 		),
 		'High Surrogates' => array(
 			0 => 0xD800,
 			1 => 0xDB7F,
-			2 => 135,
+			2 => 138,
 		),
 		'High Private Use Surrogates' => array(
 			0 => 0xDB80,
 			1 => 0xDBFF,
-			2 => 136,
+			2 => 139,
 		),
 		'Low Surrogates' => array(
 			0 => 0xDC00,
 			1 => 0xDFFF,
-			2 => 137,
+			2 => 140,
 		),
 		'Private Use Area' => array(
 			0 => 0xE000,
 			1 => 0xF8FF,
-			2 => 138,
+			2 => 141,
 		),
 		'CJK Compatibility Ideographs' => array(
 			0 => 0xF900,
 			1 => 0xFAFF,
-			2 => 139,
+			2 => 142,
 		),
 		'Alphabetic Presentation Forms' => array(
 			0 => 0xFB00,
 			1 => 0xFB4F,
-			2 => 140,
+			2 => 143,
 		),
 		'Arabic Presentation Forms-A' => array(
 			0 => 0xFB50,
 			1 => 0xFDFF,
-			2 => 141,
+			2 => 144,
 		),
 		'Variation Selectors' => array(
 			0 => 0xFE00,
 			1 => 0xFE0F,
-			2 => 142,
+			2 => 145,
 		),
 		'Vertical Forms' => array(
 			0 => 0xFE10,
 			1 => 0xFE1F,
-			2 => 143,
+			2 => 146,
 		),
 		'Combining Half Marks' => array(
 			0 => 0xFE20,
 			1 => 0xFE2F,
-			2 => 144,
+			2 => 147,
 		),
 		'CJK Compatibility Forms' => array(
 			0 => 0xFE30,
 			1 => 0xFE4F,
-			2 => 145,
+			2 => 148,
 		),
 		'Small Form Variants' => array(
 			0 => 0xFE50,
 			1 => 0xFE6F,
-			2 => 146,
+			2 => 149,
 		),
 		'Arabic Presentation Forms-B' => array(
 			0 => 0xFE70,
 			1 => 0xFEFF,
-			2 => 147,
+			2 => 150,
 		),
 		'Halfwidth and Fullwidth Forms' => array(
 			0 => 0xFF00,
 			1 => 0xFFEF,
-			2 => 148,
+			2 => 151,
 		),
 		'Specials' => array(
 			0 => 0xFFF0,
 			1 => 0xFFFF,
-			2 => 149,
+			2 => 152,
 		),
 		'Linear B Syllabary' => array(
 			0 => 0x10000,
 			1 => 0x1007F,
-			2 => 150,
+			2 => 153,
 		),
 		'Linear B Ideograms' => array(
 			0 => 0x10080,
 			1 => 0x100FF,
-			2 => 151,
+			2 => 154,
 		),
 		'Aegean Numbers' => array(
 			0 => 0x10100,
 			1 => 0x1013F,
-			2 => 152,
+			2 => 155,
 		),
 		'Ancient Greek Numbers' => array(
 			0 => 0x10140,
 			1 => 0x1018F,
-			2 => 153,
+			2 => 156,
 		),
 		'Ancient Symbols' => array(
 			0 => 0x10190,
 			1 => 0x101CF,
-			2 => 154,
+			2 => 157,
 		),
 		'Phaistos Disc' => array(
 			0 => 0x101D0,
 			1 => 0x101FF,
-			2 => 155,
+			2 => 158,
 		),
 		'Lycian' => array(
 			0 => 0x10280,
 			1 => 0x1029F,
-			2 => 156,
+			2 => 159,
 		),
 		'Carian' => array(
 			0 => 0x102A0,
 			1 => 0x102DF,
-			2 => 157,
+			2 => 160,
 		),
 		'Old Italic' => array(
 			0 => 0x10300,
 			1 => 0x1032F,
-			2 => 158,
+			2 => 161,
 		),
 		'Gothic' => array(
 			0 => 0x10330,
 			1 => 0x1034F,
-			2 => 159,
+			2 => 162,
 		),
 		'Ugaritic' => array(
 			0 => 0x10380,
 			1 => 0x1039F,
-			2 => 160,
+			2 => 163,
 		),
 		'Old Persian' => array(
 			0 => 0x103A0,
 			1 => 0x103DF,
-			2 => 161,
+			2 => 164,
 		),
 		'Deseret' => array(
 			0 => 0x10400,
 			1 => 0x1044F,
-			2 => 162,
+			2 => 165,
 		),
 		'Shavian' => array(
 			0 => 0x10450,
 			1 => 0x1047F,
-			2 => 163,
+			2 => 166,
 		),
 		'Osmanya' => array(
 			0 => 0x10480,
 			1 => 0x104AF,
-			2 => 164,
+			2 => 167,
 		),
 		'Cypriot Syllabary' => array(
 			0 => 0x10800,
 			1 => 0x1083F,
-			2 => 165,
+			2 => 168,
 		),
 		'Imperial Aramaic' => array(
 			0 => 0x10840,
 			1 => 0x1085F,
-			2 => 166,
+			2 => 169,
 		),
 		'Phoenician' => array(
 			0 => 0x10900,
 			1 => 0x1091F,
-			2 => 167,
+			2 => 170,
 		),
 		'Lydian' => array(
 			0 => 0x10920,
 			1 => 0x1093F,
-			2 => 168,
+			2 => 171,
 		),
 		'Kharoshthi' => array(
 			0 => 0x10A00,
 			1 => 0x10A5F,
-			2 => 169,
+			2 => 172,
 		),
 		'Old South Arabian' => array(
 			0 => 0x10A60,
 			1 => 0x10A7F,
-			2 => 170,
+			2 => 173,
 		),
 		'Avestan' => array(
 			0 => 0x10B00,
 			1 => 0x10B3F,
-			2 => 171,
+			2 => 174,
 		),
 		'Inscriptional Parthian' => array(
 			0 => 0x10B40,
 			1 => 0x10B5F,
-			2 => 172,
+			2 => 175,
 		),
 		'Inscriptional Pahlavi' => array(
 			0 => 0x10B60,
 			1 => 0x10B7F,
-			2 => 173,
+			2 => 176,
 		),
 		'Old Turkic' => array(
 			0 => 0x10C00,
 			1 => 0x10C4F,
-			2 => 174,
+			2 => 177,
 		),
 		'Rumi Numeral Symbols' => array(
 			0 => 0x10E60,
 			1 => 0x10E7F,
-			2 => 175,
+			2 => 178,
+		),
+		'Brahmi' => array(
+			0 => 0x11000,
+			1 => 0x1107F,
+			2 => 179,
 		),
 		'Kaithi' => array(
 			0 => 0x11080,
 			1 => 0x110CF,
-			2 => 176,
+			2 => 180,
 		),
 		'Cuneiform' => array(
 			0 => 0x12000,
 			1 => 0x123FF,
-			2 => 177,
+			2 => 181,
 		),
 		'Cuneiform Numbers and Punctuation' => array(
 			0 => 0x12400,
 			1 => 0x1247F,
-			2 => 178,
+			2 => 182,
 		),
 		'Egyptian Hieroglyphs' => array(
 			0 => 0x13000,
 			1 => 0x1342F,
-			2 => 179,
+			2 => 183,
+		),
+		'Bamum Supplement' => array(
+			0 => 0x16800,
+			1 => 0x16A3F,
+			2 => 184,
+		),
+		'Kana Supplement' => array(
+			0 => 0x1B000,
+			1 => 0x1B0FF,
+			2 => 185,
 		),
 		'Byzantine Musical Symbols' => array(
 			0 => 0x1D000,
 			1 => 0x1D0FF,
-			2 => 180,
+			2 => 186,
 		),
 		'Musical Symbols' => array(
 			0 => 0x1D100,
 			1 => 0x1D1FF,
-			2 => 181,
+			2 => 187,
 		),
 		'Ancient Greek Musical Notation' => array(
 			0 => 0x1D200,
 			1 => 0x1D24F,
-			2 => 182,
+			2 => 188,
 		),
 		'Tai Xuan Jing Symbols' => array(
 			0 => 0x1D300,
 			1 => 0x1D35F,
-			2 => 183,
+			2 => 189,
 		),
 		'Counting Rod Numerals' => array(
 			0 => 0x1D360,
 			1 => 0x1D37F,
-			2 => 184,
+			2 => 190,
 		),
 		'Mathematical Alphanumeric Symbols' => array(
 			0 => 0x1D400,
 			1 => 0x1D7FF,
-			2 => 185,
+			2 => 191,
 		),
 		'Mahjong Tiles' => array(
 			0 => 0x1F000,
 			1 => 0x1F02F,
-			2 => 186,
+			2 => 192,
 		),
 		'Domino Tiles' => array(
 			0 => 0x1F030,
 			1 => 0x1F09F,
-			2 => 187,
+			2 => 193,
+		),
+		'Playing Cards' => array(
+			0 => 0x1F0A0,
+			1 => 0x1F0FF,
+			2 => 194,
 		),
 		'Enclosed Alphanumeric Supplement' => array(
 			0 => 0x1F100,
 			1 => 0x1F1FF,
-			2 => 188,
+			2 => 195,
 		),
 		'Enclosed Ideographic Supplement' => array(
 			0 => 0x1F200,
 			1 => 0x1F2FF,
-			2 => 189,
+			2 => 196,
+		),
+		'Miscellaneous Symbols And Pictographs' => array(
+			0 => 0x1F300,
+			1 => 0x1F5FF,
+			2 => 197,
+		),
+		'Emoticons' => array(
+			0 => 0x1F600,
+			1 => 0x1F64F,
+			2 => 198,
+		),
+		'Transport And Map Symbols' => array(
+			0 => 0x1F680,
+			1 => 0x1F6FF,
+			2 => 199,
+		),
+		'Alchemical Symbols' => array(
+			0 => 0x1F700,
+			1 => 0x1F77F,
+			2 => 200,
 		),
 		'CJK Unified Ideographs Extension B' => array(
 			0 => 0x20000,
 			1 => 0x2A6DF,
-			2 => 190,
+			2 => 201,
 		),
 		'CJK Unified Ideographs Extension C' => array(
 			0 => 0x2A700,
 			1 => 0x2B73F,
-			2 => 191,
+			2 => 202,
+		),
+		'CJK Unified Ideographs Extension D' => array(
+			0 => 0x2B740,
+			1 => 0x2B81F,
+			2 => 203,
 		),
 		'CJK Compatibility Ideographs Supplement' => array(
 			0 => 0x2F800,
 			1 => 0x2FA1F,
-			2 => 192,
+			2 => 204,
 		),
 		'Tags' => array(
 			0 => 0xE0000,
 			1 => 0xE007F,
-			2 => 193,
+			2 => 205,
 		),
 		'Variation Selectors Supplement' => array(
 			0 => 0xE0100,
 			1 => 0xE01EF,
-			2 => 194,
+			2 => 206,
 		),
 		'Supplementary Private Use Area-A' => array(
 			0 => 0xF0000,
 			1 => 0xFFFFF,
-			2 => 195,
+			2 => 207,
 		),
 		'Supplementary Private Use Area-B' => array(
 			0 => 0x100000,
 			1 => 0x10FFFF,
-			2 => 196,
+			2 => 208,
 		),
 	);
 
@@ -1906,7 +2518,7 @@ class UTF8
 		{
 			if (! preg_match('~~suSX', $data)) return false;
 			if (function_exists('preg_last_error') && preg_last_error() !== PREG_NO_ERROR) return false;
-			#NOTE preg_match('~~suSX') much faster (up to 4 times), then mb_check_encoding($data, 'UTF-8')!
+			#preg_match('~~suSX') much faster (up to 4 times), then mb_check_encoding($data, 'UTF-8')!
 			#if (function_exists('mb_check_encoding') && ! mb_check_encoding($data, 'UTF-8')) return false; #DEPRECATED
 			if ($is_strict && preg_match('/[^\x09\x0A\x0D\x20-\xBF\xC2-\xF7]/sSX', $data)) return false;
 			return true;
@@ -1994,7 +2606,7 @@ class UTF8
 			$chars = self::str_split($data);
 			if ($chars === false) return false; #broken UTF-8
 			unset($data); #memory free
-			$skip = array(); #кэшируем уже проверенные символы
+			$skip = array(); #save to cache already checked symbols
 			foreach ($chars as $i => $char)
 			{
 				if (array_key_exists($char, $skip)) continue; #speed improve
@@ -2023,7 +2635,7 @@ class UTF8
 					}
 				}#foreach
 				if (! $is_valid) return false;
-				$skip[$char] = true;
+				$skip[$char] = null;
 			}#foreach
 			return true;
 		}
@@ -2045,7 +2657,7 @@ class UTF8
 	 * 3) Сконвертированные значения снова проверяются.
 	 *    Если данные опять не в кодировке UTF-8, то они считаются разбитыми и функция возвращает FALSE.
 	 *
-	 * ЗАМЕЧАНИЕ
+	 * NOTICE
 	 *   Функция должна вызываться после self::unescape_request()!
 	 *
 	 * @see     self::unescape_request()
@@ -2189,6 +2801,61 @@ class UTF8
 	}
 
 	/**
+	 * Converts a UTF-8 string to a UNICODE codepoints
+	 *
+	 * @param   string|null     $s  UTF-8 string
+	 * @return  array|bool|null     Unicode codepoints
+	 *                              Returns FALSE if $s broken (not UTF-8)
+	 */
+	public static function to_unicode($s)
+	{
+		if (! ReflectionTypeHint::isValid()) return false;
+		if (is_null($s)) return $s;
+
+		$s2 = null;
+		#since PHP-5.3.x iconv() little faster then mb_convert_encoding()
+		if (function_exists('iconv')) $s2 = @iconv('UTF-8', 'UCS-4BE', $s);
+		elseif (function_exists('mb_convert_encoding')) $s2 = @mb_convert_encoding($s, 'UCS-4BE', 'UTF-8');
+		if (is_string($s2)) return array_values(unpack('N*', $s2));
+		if ($s2 !== null) return false;
+
+		$a = self::str_split($s);
+		if ($a === false) return false;
+		return array_map(array(__CLASS__, 'ord'), $a);
+	}
+
+	/**
+	 * Converts a UNICODE codepoints to a UTF-8 string
+	 *
+	 * @param   array|null       $a  Unicode codepoints
+	 * @return  string|bool|null     UTF-8 string
+	 *                               Returns FALSE if error occured
+	 */
+	public static function from_unicode($a)
+	{
+		if (! ReflectionTypeHint::isValid()) return false;
+		if (is_null($a)) return $a;
+
+		#since PHP-5.3.x iconv() little faster then mb_convert_encoding()
+		if (function_exists('iconv'))
+		{
+			array_walk($a, function(&$cp) { $cp = pack('N', $cp); });
+			$s = @iconv('UCS-4BE', 'UTF-8', implode('', $a));
+			if (! is_string($s)) return false;
+			return $s;
+		}
+		if (function_exists('mb_convert_encoding'))
+		{
+			array_walk($a, function(&$cp) { $cp = pack('N', $cp); });
+			$s = mb_convert_encoding(implode('', $a), 'UTF-8', 'UCS-4BE');
+			if (! is_string($s)) return false;
+			return $s;
+		}
+
+		return implode('', array_map(array(__CLASS__, 'chr'), $a));
+	}
+
+	/**
 	 * Converts a UTF-8 character to a UNICODE codepoint
 	 *
 	 * @param   string|null    $char  UTF-8 character
@@ -2203,16 +2870,6 @@ class UTF8
 		static $cache = array();
 		if (array_key_exists($char, $cache)) return $cache[$char]; #speed improve
 
-		#TODO проверить скорость работы
-		if (0)
-		{
-			$s = null;
-			if (function_exists('iconv')) $s = @iconv('UTF-8', 'UCS-4BE', $char);
-			elseif (function_exists('mb_convert_encoding')) $s = @mb_convert_encoding($char, 'UCS-4BE', 'UTF-8');
-			if (is_string($s)) return reset(unpack('N', $s));
-			if ($s !== null) return false;
-		}
-
 		switch (strlen($char))
 		{
 			case 1 : return $cache[$char] = ord($char);
@@ -2226,7 +2883,7 @@ class UTF8
 											((ord($char{1}) & 63) << 12) |
 											((ord($char{0}) & 7)  << 18);
 			default :
-				trigger_error('Character 0x ' . bin2hex($char) . ' is not UTF-8!', E_USER_WARNING);
+				trigger_error('Character 0x' . bin2hex($char) . ' is not UTF-8!', E_USER_WARNING);
 				return false;
 		}
 	}
@@ -2235,7 +2892,8 @@ class UTF8
 	 * Converts a UNICODE codepoint to a UTF-8 character
 	 *
 	 * @param   int|digit|null  $cp  Unicode codepoint
-	 * @return  string|null          UTF-8 character
+	 * @return  string|bool|null     UTF-8 character
+	 *                               Returns FALSE if error occured
 	 */
 	public static function chr($cp) # = from_unicode() or unicode_to_utf8()
 	{
@@ -2244,17 +2902,6 @@ class UTF8
 
 		static $cache = array();
 		if (array_key_exists($cp, $cache)) return $cache[$cp]; #speed improve
-
-		#TODO проверить скорость работы
-		if (0)
-		{
-			$s = null;
-			if (function_exists('iconv')) $s = @iconv('UCS-4BE', 'UTF-8', pack('N', $cp));
-			elseif (function_exists('mb_convert_encoding')) $s = mb_convert_encoding(pack('N', $cp), 'UTF-8', 'UCS-4BE');
-			if (is_string($s)) return $s;
-			#U+FFFD REPLACEMENT CHARACTER
-			if ($s !== null) return $cache[$cp] = "\xEF\xBF\xBD";
-		}
 
 		if ($cp <= 0x7f)     return $cache[$cp] = chr($cp);
 		if ($cp <= 0x7ff)    return $cache[$cp] = chr(0xc0 | ($cp >> 6))  .
@@ -2342,14 +2989,16 @@ class UTF8
 		{
 			if (! $data) return $data;
 			if (self::is_ascii($data)) return strtoupper($data); #speed improve!
-			if (function_exists('mb_strtoupper')) return mb_strtoupper($data, 'utf-8');
+			#deprecated, since PHP-5.3.x strtr() 2-3 times faster then mb_strtolower()
+			#if (function_exists('mb_strtoupper')) return mb_strtoupper($data, 'utf-8');
 			return strtr($data, array_flip(self::$convert_case_table));
 		}
 		if ($mode === CASE_LOWER)
 		{
 			if (! $data) return $data;
 			if (self::is_ascii($data)) return strtolower($data); #speed improve!
-			if (function_exists('mb_strtolower')) return mb_strtolower($data, 'utf-8');
+			#deprecated, since PHP-5.3.x strtr() 2-3 times faster then mb_strtolower()
+			#if (function_exists('mb_strtolower')) return mb_strtolower($data, 'utf-8');
 			return strtr($data, self::$convert_case_table);
 		}
 		trigger_error('Parameter 2 should be a constant of CASE_LOWER or CASE_UPPER!', E_USER_WARNING);
@@ -2357,7 +3006,7 @@ class UTF8
 	}
 
 	/**
-	 * Конвертирует данные в нижний регистр.
+	 * Convert a data to lower case
 	 *
 	 * @param   array|scalar|null  $data
 	 * @return  scalar|bool|null   Returns FALSE if error occured
@@ -2369,12 +3018,36 @@ class UTF8
 	}
 
 	/**
-	 * Конвертирует данные в верхний регистр.
+	 * Convert a data to upper case
 	 *
 	 * @param   array|scalar|null  $data
 	 * @return  scalar|null        Returns FALSE if error occured
 	 */
 	public static function uppercase($data)
+	{
+		if (! ReflectionTypeHint::isValid()) return false;
+		return self::convert_case($data, CASE_UPPER);
+	}
+
+	/**
+	 * Convert a data to lower case
+	 *
+	 * @param   array|scalar|null  $data
+	 * @return  scalar|bool|null   Returns FALSE if error occured
+	 */
+	public static function strtolower($data)
+	{
+		if (! ReflectionTypeHint::isValid()) return false;
+		return self::convert_case($data, CASE_LOWER);
+	}
+
+	/**
+	 * Convert a data to upper case
+	 *
+	 * @param   array|scalar|null  $data
+	 * @return  scalar|null        Returns FALSE if error occured
+	 */
+	public static function strtoupper($data)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
 		return self::convert_case($data, CASE_UPPER);
@@ -2403,17 +3076,17 @@ class UTF8
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (! is_string($s)) return $s;
 
-		#оптимизация скорости
+		#speed improve
 		if (strlen($s) < 4  #по минимальной длине сущности - 4 байта: &#d; &xx;
 			|| ($pos = strpos($s, '&') === false) || strpos($s, ';', $pos) === false) return $s;
 
 		$table = self::$html_entity_table;
 		if ($is_special_chars) $table += self::$html_special_chars_table;
 
-		#заменяем именованные сущности
-		#оптимизация скорости: заменяем только те сущности, которые используются в html коде!
-		#эта часть кода работает быстрее, чем $s = strtr($s, $table);
-		if (preg_match_all('/&[a-zA-Z]++\d*+;/sSX', $s, $m, null, $pos))
+		#replace named entities
+		$s = strtr($s, $table);
+		#block below deprecated, since PHP-5.3.x strtr() 1.5 times faster
+		if (0 && preg_match_all('/&[a-zA-Z]++\d*+;/sSX', $s, $m, null, $pos))
 		{
 			foreach (array_unique($m[0]) as $entity)
 			{
@@ -2425,15 +3098,15 @@ class UTF8
 		if (strpos($s, '&#') !== false)  #speed improve
 		{
 			$class = __CLASS__;
-			$html_special_chars_table_flip = array_flip(self::$html_special_chars_table);
+			$html_special_chars_table_flipped = array_flip(self::$html_special_chars_table);
 			$s = preg_replace_callback('/&#((x)[\da-fA-F]{1,6}+|\d{1,7}+);/sSX', 
-										function (array $m) use ($class, $html_special_chars_table_flip, $is_special_chars)
+										function (array $m) use ($class, $html_special_chars_table_flipped, $is_special_chars)
 										{
 											$codepoint = isset($m[2]) && $m[2] === 'x' ? hexdec($m[1]) : $m[1];
 											if (! $is_special_chars)
 											{
 												$char = pack('C', $codepoint);
-												if (array_key_exists($char, $html_special_chars_table_flip)) return $html_special_chars_table_flip[$char];
+												if (array_key_exists($char, $html_special_chars_table_flipped)) return $html_special_chars_table_flipped[$char];
 											}
 											return $class::chr($codepoint);
 										}, $s);
@@ -2463,15 +3136,15 @@ class UTF8
 		#if ($is_special_chars_only) return strtr($s, array_flip(self::$html_special_chars_table));
 		if ($is_special_chars_only) return htmlspecialchars($s);
 
-		$table = array_flip(self::$html_entity_table);
-
-		#заменяем UTF-8 символы на именованные сущности:
-		#оптимизация скорости: заменяем только те символы, которые используются в html коде!
-		if (preg_match_all('~(?>	[\xc2\xc3\xc5\xc6\xcb\xce\xcf][\x80-\xbf]  #2 bytes
-								|	\xe2[\x80-\x99][\x82-\xac]                 #3 bytes
-							  )
-                            ~sxSX', $s, $m))
+		#replace UTF-8 chars to named entities:
+		$s = strtr($s, array_flip(self::$html_entity_table));
+		#block below deprecated, since PHP-5.3.x strtr() 3 times faster
+		if (0 && preg_match_all('~(?>	[\xc2\xc3\xc5\xc6\xcb\xce\xcf][\x80-\xbf]  #2 bytes
+									|	\xe2[\x80-\x99][\x82-\xac]                 #3 bytes
+								  )
+								~sxSX', $s, $m))
 		{
+			$table = array_flip(self::$html_entity_table);
 			foreach (array_unique($m[0]) as $char)
 			{
 				if (array_key_exists($char, $table)) $s = str_replace($char, $table[$char], $s);
@@ -2543,7 +3216,7 @@ class UTF8
 		if ($continue === null) $continue = "\xe2\x80\xa6";
 		if (! $maxlength) $maxlength = 256;
 
-		#оптимизация скорости:
+		#speed improve block
 		#{{{
 		if (strlen($s) <= $maxlength) return $s;
 		$s2 = str_replace("\r\n", '?', $s);
@@ -2556,15 +3229,17 @@ class UTF8
 		if (strlen($s2) <= $maxlength || self::strlen($s2) <= $maxlength) return $s;
 		#}}}
 
-		preg_match_all('/(?> \r\n   # переносы строк
-                           | &(?> [a-zA-Z][a-zA-Z\d]+
-                                | \#(?> \d{1,4}
-                                      | x[\da-fA-F]{2,4}
-                                    )
-                              );  # html сущности (&lt; &gt; &amp; &quot;)
-                           | .
-                         )
-                        /sxuSX', $s, $m);
+		$r = preg_match_all('/(?> \r\n   # переносы строк
+								   | &(?> [a-zA-Z][a-zA-Z\d]+
+										| \#(?> \d{1,4}
+											  | x[\da-fA-F]{2,4}
+											)
+									  );  # html сущности (&lt; &gt; &amp; &quot;)
+								   | .
+								 )
+								/sxuSX', $s, $m);
+		if ($r === false) return false;
+
 		#d($m);
 		if (count($m[0]) <= $maxlength) return $s;
 
@@ -2632,8 +3307,11 @@ class UTF8
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (is_null($s)) return $s;
+
+		//since PHP-5.3.x mb_strlen() faster then strlen(utf8_decode())
+		if (function_exists('mb_strlen')) return mb_strlen($s, 'utf-8');
+
 		/*
-          The fastest!
           utf8_decode() converts characters that are not in ISO-8859-1 to '?', which, for the purpose of counting, is quite alright.
           It's much faster than iconv_strlen()
           Note: this function does not count bad UTF-8 bytes in the string - these are simply ignored
@@ -2641,18 +3319,17 @@ class UTF8
 		return strlen(utf8_decode($s));
 
 		/*
-        #DEPRECATED, speed less!
-        if (function_exists('mb_strlen')) return mb_strlen($s, 'utf-8');
+        #slowly then strlen(utf8_decode())
         if (function_exists('iconv_strlen')) return iconv_strlen($s, 'utf-8');
 
         #Do not count UTF-8 continuation bytes
         #return strlen(preg_replace('/[\x80-\xBF]/sSX', '', $s));
 
-        #Тесты показали, что этот способ работает медленнее, чем хак через utf8_decode()
+        #slowly then strlen(utf8_decode())
         preg_match_all('~.~suSX', $str, $m);
         return count($m[0]);
 
-        #Тесты показали, что этот способ работает медленнее, чем через регулярное выражение!
+        #slowly then preg_match_all() + count()
         $n = 0;
         for ($i = 0, $len = strlen($s); $i < $len; $i++)
         {
@@ -2671,7 +3348,7 @@ class UTF8
 	 * @param   string|int     $needle  The searched substring
 	 * @param   int|null       $offset  The optional offset parameter specifies the position from which the search should be performed
 	 * @return  int|bool|null           Returns the numeric position of the first occurrence of needle in haystack.
-	 *                                  If needle is not found, self::strpos() will return FALSE.
+	 *                                  If needle is not found, will return FALSE.
 	 */
 	public static function strpos($s, $needle, $offset = null)
 	{
@@ -2679,12 +3356,35 @@ class UTF8
 		if (is_null($s)) return $s;
 
 		if ($offset === null || $offset < 0) $offset = 0;
-		if (function_exists('iconv_strpos')) return iconv_strpos($s, $needle, $offset, 'utf-8');
 		if (function_exists('mb_strpos')) return mb_strpos($s, $needle, $offset, 'utf-8');
+		#iconv_strpos() deprecated, because slowly than self::strlen(substr())
+		#if (function_exists('iconv_strpos')) return iconv_strpos($s, $needle, $offset, 'utf-8');
 		$byte_pos = $offset;
 		do if (($byte_pos = strpos($s, $needle, $byte_pos)) === false) return false;
 		while (($char_pos = self::strlen(substr($s, 0, $byte_pos++))) < $offset);
 		return $char_pos;
+	}
+
+	/**
+	 * Find position of first occurrence of a case-insensitive string.
+	 *
+	 * @param   string|null    $s       The entire string
+	 * @param   string|int     $needle  The searched substring
+	 * @param   int|null       $offset  The optional offset parameter specifies the position from which the search should be performed
+	 * @return  int|bool|null           Returns the numeric position of the first occurrence of needle in haystack.
+	 *                                  If needle is not found, will return FALSE.
+	 */
+	public static function stripos($s, $needle, $offset = null)
+	{
+		if (! ReflectionTypeHint::isValid()) return false;
+		if (is_null($s)) return $s;
+
+		if ($offset === null || $offset < 0) $offset = 0;
+		if (self::is_ascii($s)) return stripos($s, $needle, $offset);
+		$s = self::convert_case($s, CASE_LOWER);
+		$needle = self::convert_case($needle, CASE_LOWER);
+		if ($s === false || $needle === false) return false;
+		return self::strpos($s, $needle, $offset);
 	}
 
 	/**
@@ -2717,20 +3417,23 @@ class UTF8
 	 * @param    string|null       $s
 	 * @param    int|digit         $offset
 	 * @param    int|null|digit    $length
-	 * @param    bool              $in_cycle  speed improve for calling this method in cycles with the same $str and different $offset/$length!
 	 * @return   string|bool|null             returns FALSE if error occured
 	 */
-	public static function substr($s, $offset, $length = null, $in_cycle = false)
+	public static function substr($s, $offset, $length = null)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (is_null($s)) return $s;
 
-		if (! $in_cycle)
+		#since PHP-5.3.x mb_substr() faster then iconv_substr()
+		if (function_exists('mb_substr'))
 		{
 			if ($length === null) $length = self::strlen($s);
-			#try to find standard functions, iconv_substr() faster then mb_substr()!
-			if (function_exists('iconv_substr')) return iconv_substr($s, $offset, $length, 'utf-8');
-			if (function_exists('mb_substr')) return mb_substr($s, $offset, $length, 'utf-8');
+			return mb_substr($s, $offset, $length, 'utf-8');
+		}
+		if (function_exists('iconv_substr'))
+		{
+			if ($length === null) $length = self::strlen($s);
+			return iconv_substr($s, $offset, $length, 'utf-8');
 		}
 
 		static $_s = null;
@@ -2811,7 +3514,7 @@ class UTF8
 	 * закодированных устаревшей функцией javascript://encode().
 	 * Рекомендуется использовать функцию javascript://encodeURIComponent().
 	 *
-	 * ЗАМЕЧАНИЕ
+	 * NOTICE
 	 * Устаревший формат %uXXXX позволяет использовать юникод только из диапазона UCS-2, т.е. от U+0 до U+FFFF
 	 *
 	 * @param   scalar|array|null  $data
@@ -2839,21 +3542,17 @@ class UTF8
 			return preg_replace_callback('/%u(  [\da-fA-F]{4}+          #%uXXXX     only UCS-2
                                               | \{ [\da-fA-F]{1,6}+ \}  #%u{XXXXXX} extended form for all UNICODE charts
                                              )
-                                          /sxSX', array('self', $is_rawurlencode ? '_unescape_rawurlencode' : '_unescape'), $data);
+                                          /sxSX', 
+											function (array $m) use ($is_rawurlencode)
+											{
+												$codepoint = hexdec(trim($m[1], '{}'));
+												$char = self::chr($codepoint);
+												return $is_rawurlencode ? rawurlencode($char) : $char;
+											},
+											$data);
 		}
 		if (is_scalar($data) || is_null($data)) return $data;  #~ null, integer, float, boolean
 		return false; #object or resource
-	}
-
-	private static function _unescape(array $m)
-	{
-		$codepoint = hexdec(trim($m[1], '{}'));
-		return self::chr($codepoint);
-	}
-
-	private static function _unescape_rawurlencode(array $m)
-	{
-		return rawurlencode(self::_unescape($m));
 	}
 
 	/**
@@ -2974,7 +3673,7 @@ class UTF8
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (is_null($s)) return $s;
 		if ($charlist === null || self::is_ascii($charlist)) return ltrim($s);
-		return preg_replace('~^[' . self::_preg_quote_class($charlist, '~') . ']+~uSX', '', $s);
+		return preg_replace('~^[' . self::_preg_quote_class($charlist, '~') . ']+~suSX', '', $s);
 	}
 
 	/**
@@ -2987,7 +3686,7 @@ class UTF8
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (is_null($s)) return $s;
 		if ($charlist === null || self::is_ascii($charlist)) return rtrim($s);
-		return preg_replace('~[' . self::_preg_quote_class($charlist, '~') . ']+$~uSX', '', $s);
+		return preg_replace('~[' . self::_preg_quote_class($charlist, '~') . ']+$~suSX', '', $s);
 	}
 
 	/**
@@ -3001,8 +3700,8 @@ class UTF8
 		if (is_null($s)) return $s;
 		if ($charlist === null || self::is_ascii($charlist)) return trim($s);
 		$charlist_re = self::_preg_quote_class($charlist, '~');
-		$s = preg_replace('~^[' . $charlist_re . ']+~uSX', '', $s);
-		return preg_replace('~[' . $charlist_re . ']+$~uSX', '', $s);
+		$s = preg_replace('~^[' . $charlist_re . ']+~suSX', '', $s);
+		return preg_replace('~[' . $charlist_re . ']+$~suSX', '', $s);
 	}
 
 	private static function _preg_quote_class($charlist, $delimiter = null)
@@ -3220,6 +3919,10 @@ class UTF8
 
 	public static function tests()
 	{
+		assert_options(ASSERT_ACTIVE,   true);
+		assert_options(ASSERT_BAIL,     true);
+		assert_options(ASSERT_WARNING,  true);
+		assert_options(ASSERT_QUIET_EVAL, false);
 		$a = array(
 			'self::html_entity_decode("&quot;&amp;&lt;&gt;", true) === "\"&<>"',
 			'self::html_entity_decode("&quot;&amp;&lt;&gt;", false) === "&quot;&amp;&lt;&gt;"',
@@ -3261,13 +3964,28 @@ class UTF8
 
 			'self::is_utf8(file_get_contents(' . var_export(__FILE__, true) . ', true)) === true',
 			'self::is_utf8(file_get_contents(' . var_export(__FILE__, true) . ', false)) === true',
+			'self::is_ascii(file_get_contents(' . var_export(__FILE__, true) . ')) === false',
 
 			#range() uses ord() and chr()
 			'self::range("A", "D") === array("A", "B", "C", "D")',
 			'self::range("а", "г") === array("а", "б", "в", "г")',
 			'self::range(1, 3) === array(1, 2, 3)',
+
+			'"↔" === self::chr(self::ord("↔"))',
+			'"123-ABC-abc-АБВ-абв" === self::from_unicode(self::to_unicode("123-ABC-abc-АБВ-абв"))',
+			'self::strpos("123-ABC-abc-АБВ-абв", "АБВ") === 12',
+			'self::stripos("123-ABC-abc-АБВ-абв", "абв") === 12',
+
+			//'self::strlen(file_get_contents(' . var_export(__FILE__, true) . ', true))'
 		);
 		foreach ($a as $k => $v) if (! assert($v)) return false;
+
+		//$start_time = microtime(true);
+		//$s = file_get_contents(__FILE__);
+		//for ($i = 0; $i < 10; $i++) $r = self::html_entity_encode($s);
+		//$time = microtime(true) - $start_time;
+		//d($time, $r);
+
 		return true;
 	}
 
