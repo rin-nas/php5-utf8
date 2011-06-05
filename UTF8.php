@@ -505,8 +505,6 @@ class UTF8
 		"\xff" => "\xd1\x8f",      #U+044f CYRILLIC SMALL LETTER YA
 	);
 
-	public static $convert_case_table_flipped;
-
 	/**
 	 * UTF-8 Case lookup table
 	 *
