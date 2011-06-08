@@ -1,3 +1,8 @@
+2.2.1 / 2011-06-08
+
+	* UTF8::preg_quote_case_insensitive() added
+	* UTF8::stripos() speed improved
+
 2.2.0 / 2011-06-06
 
 	* UTF8::strlen(), UTF8::substr(), UTF8::strpos(),

@@ -7,7 +7,7 @@
  *
  * UTF-8 support in PHP 5.
  *
- * Features and benefits of using this class:
+ * Features and benefits of using this class
  *   * Compatibility with the interface standard PHP functions that deal with single-byte encodings
  *   * Ability to work without PHP extensions ICONV and MBSTRING, if any, that are actively used!
  *   * Useful features are missing from the ICONV and MBSTRING
@@ -18,10 +18,10 @@
  *   * PHP> = 5.3.x
  *
  * In Russian:
- * 
+ *
  * Поддержка UTF-8 в PHP 5.
  *
- * Возможности и преимущества использования этого класса:
+ * Возможности и преимущества использования этого класса
  *   * Совместимость с интерфейсом стандартных PHP функций, работающих с однобайтовыми кодировками
  *   * Возможность работы без PHP расширений ICONV и MBSTRING, если они есть, то активно используются!
  *   * Полезные функции, отсутствующие в ICONV и MBSTRING
@@ -35,14 +35,14 @@
  *   $s = 'Hello, Привет';
  *   if (UTF8::is_utf8($s)) echo UTF8::strlen($s);
  *
- * Символы UTF-8 получаются из Unicode следующим образом:
+ * UTF-8 encoding scheme:
  *   2^7   0x00000000 — 0x0000007F  0xxxxxxx
  *   2^11  0x00000080 — 0x000007FF  110xxxxx 10xxxxxx
  *   2^16  0x00000800 — 0x0000FFFF  1110xxxx 10xxxxxx 10xxxxxx
  *   2^21  0x00010000 — 0x001FFFFF  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
  *   1-4 bytes length: 2^7 + 2^11 + 2^16 + 2^21 = 2 164 864
  *
- * Если бы я был повелителем мира, то оставил бы только 2 кодировки: UTF-8 и UTF-32 ;)
+ * If I was a owner of the world, I would leave only 2 encoding: UTF-8 and UTF-32 ;-)
  *
  * Useful links
  *   http://ru.wikipedia.org/wiki/UTF8
@@ -57,13 +57,13 @@
  * @link     http://code.google.com/p/php5-utf8/
  * @license  http://creativecommons.org/licenses/by-sa/3.0/
  * @author   Nasibullin Rinat
- * @version  2.2.0
+ * @version  2.2.1
  */
 class UTF8
 {
 	/**
-	 * Регулярное выражение для символа в UTF-8 без использоватния флага /u
-	 * @deprecated  Используйте взамен точку (".") и флаг /u, это работает быстрее!
+	 * Regular expression for a character in UTF-8 without the use of a flag /u
+	 * @deprecated  Instead, use a dot (".") and the flag /u, it works faster!
 	 * @var string
 	 */
 	public static $char_re = '  [\x09\x0A\x0D\x20-\x7E]           # ASCII strict
@@ -77,15 +77,17 @@ class UTF8
                               |  \xF4[\x80-\x8F][\x80-\xBF]{2}    # plane 16
                              ';
 
-	/*
-	Combining diactrical marks (Unicode 5.1).
-	http://www.unicode.org/charts/PDF/U0300.pdf
-	http://www.unicode.org/charts/PDF/U1DC0.pdf
-	http://www.unicode.org/charts/PDF/UFE20.pdf
-	Например, русские буквы Ё (U+0401) и Й (U+0419) существуют в виде монолитных символов,
-	хотя могут быть представлены и набором базового символа с последующим диакритическим знаком,
-	то есть в составной форме (Decomposed): (U+0415 U+0308), (U+0418 U+0306).
-	*/
+	/**
+	 * Combining diactrical marks (Unicode 5.1).
+	 * Например, русские буквы Ё (U+0401) и Й (U+0419) существуют в виде монолитных символов,
+	 * хотя могут быть представлены и набором базового символа с последующим диакритическим знаком,
+	 * то есть в составной форме (Decomposed): (U+0415 U+0308), (U+0418 U+0306).
+	 *
+	 * @link http://www.unicode.org/charts/PDF/U0300.pdf
+	 * @link http://www.unicode.org/charts/PDF/U1DC0.pdf
+	 * @link http://www.unicode.org/charts/PDF/UFE20.pdf
+	 * @var  string
+	 */
 	#public static $diactrical_re = '\p{M}'; #alternative, but only with /u flag
 	public static $diactrical_re = '  \xcc[\x80-\xb9]|\xcd[\x80-\xaf]  #UNICODE range: U+0300 - U+036F (for letters)
                                     | \xe2\x83[\x90-\xbf]              #UNICODE range: U+20D0 - U+20FF (for symbols)
@@ -93,6 +95,9 @@ class UTF8
                                     | \xef\xb8[\xa0-\xaf]              #UNICODE range: U+FE20 - U+FE2F (combining half marks)
                                    ';
 
+	/**
+	 * @var  array
+	 */
 	public static $html_special_chars_table = array(
 		'&quot;' => "\x22",  #U+0022 ["] &#34; quotation mark = APL quote
 		'&amp;'  => "\x26",  #U+0026 [&] &#38; ampersand
@@ -364,7 +369,8 @@ class UTF8
 	/**
 	 * This table contains the data on how cp1259 characters map into Unicode (UTF-8).
 	 * The cp1259 map describes standart tatarish cyrillic charset and based on the cp1251 table.
-	 * cp1259 - это устаревшая однобайтовая кодировка татарского языка, которая включает в себя все русские буквы из cp1251.
+	 * cp1259 -- this is an outdated one byte encoding of the Tatar language,
+	 * which includes all the Russian letters from cp1251.
 	 *
 	 * koi8-r -> UNICODE table:
 	 *   http://tools.ietf.org/html/rfc1489
@@ -2350,6 +2356,7 @@ class UTF8
 		{
 			if ($charset_from === 'UTF-8' && ! self::is_utf8($data)) return $data;  #smart behaviour
 			if ($charset_to === 'UTF-8' && self::is_utf8($data)) return $data;  #smart behaviour
+			#since PHP-5.3.x iconv() faster then mb_convert_encoding()
 			if (function_exists('iconv')) return iconv($charset_from, $charset_to . '//IGNORE//TRANSLIT', $data);
 			if (function_exists('mb_convert_encoding')) return mb_convert_encoding($data, $charset_to, $charset_from);
 			if ($charset_from === 'cp1251' || $charset_from === 'cp1259') return strtr($data, self::$cp1259_table);
@@ -2480,8 +2487,9 @@ class UTF8
 			}
 			return true;
 		}
-		#if (is_string($data)) return preg_match('/^[\x00-\x7f]*$/sSX', $data);
-		if (is_string($data)) return ltrim($data, "\x00..\x7f") === '';  #small speed improve
+		#ltrim() little faster then preg_match()
+		#if (is_string($data)) return preg_match('/^[\x00-\x7f]*$/sSX', $data); #deprecated
+		if (is_string($data)) return ltrim($data, "\x00..\x7f") === '';
 		if (is_scalar($data) || is_null($data)) return true;  #~ null, integer, float, boolean
 		return false; #object or resource
 	}
@@ -2860,7 +2868,7 @@ class UTF8
 	 * @return  int|bool|null         Unicode codepoint
 	 *                                Returns FALSE if $char broken (not UTF-8)
 	 */
-	public static function ord($char) # = UTF8::to_unicode() or unicode_from_utf8()
+	public static function ord($char)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (is_null($char)) return $char;
@@ -2893,7 +2901,7 @@ class UTF8
 	 * @return  string|bool|null     UTF-8 character
 	 *                               Returns FALSE if error occured
 	 */
-	public static function chr($cp) # = from_unicode() or unicode_to_utf8()
+	public static function chr($cp)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (is_null($cp)) return $cp;
@@ -2971,9 +2979,10 @@ class UTF8
 	 * @link    http://ru.wikipedia.org/wiki/ISO_639-1
 	 * @param   array|scalar|null $data  Данные произвольной структуры
 	 * @param   int               $mode  {CASE_LOWER|CASE_UPPER}
+	 * @param   bool              $is_ascii_optimization    for speed improve
 	 * @return  scalar|bool|null  returns FALSE if error occured
 	 */
-	public static function convert_case($data, $mode)
+	public static function convert_case($data, $mode, $is_ascii_optimization = true)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
 
@@ -2982,19 +2991,18 @@ class UTF8
 			foreach ($data as $k => &$v) $v = self::convert_case($v, $mode);
 			return $data;
 		}
-		if (! is_string($data)) return $data;
+		if (! is_string($data) || ! $data) return $data;
+
 		if ($mode === CASE_UPPER)
 		{
-			if (! $data) return $data;
-			if (self::is_ascii($data)) return strtoupper($data); #speed improve!
+			if ($is_ascii_optimization && self::is_ascii($data)) return strtoupper($data); #speed improve!
 			#deprecated, since PHP-5.3.x strtr() 2-3 times faster then mb_strtolower()
 			#if (function_exists('mb_strtoupper')) return mb_strtoupper($data, 'utf-8');
 			return strtr($data, array_flip(self::$convert_case_table));
 		}
 		if ($mode === CASE_LOWER)
 		{
-			if (! $data) return $data;
-			if (self::is_ascii($data)) return strtolower($data); #speed improve!
+			if ($is_ascii_optimization && self::is_ascii($data)) return strtolower($data); #speed improve!
 			#deprecated, since PHP-5.3.x strtr() 2-3 times faster then mb_strtolower()
 			#if (function_exists('mb_strtolower')) return mb_strtolower($data, 'utf-8');
 			return strtr($data, self::$convert_case_table);
@@ -3097,7 +3105,7 @@ class UTF8
 		{
 			$class = __CLASS__;
 			$html_special_chars_table_flipped = array_flip(self::$html_special_chars_table);
-			$s = preg_replace_callback('/&#((x)[\da-fA-F]{1,6}+|\d{1,7}+);/sSX', 
+			$s = preg_replace_callback('/&#((x)[\da-fA-F]{1,6}+|\d{1,7}+);/sSX',
 										function (array $m) use ($class, $html_special_chars_table_flipped, $is_special_chars)
 										{
 											$codepoint = isset($m[2]) && $m[2] === 'x' ? hexdec($m[1]) : $m[1];
@@ -3150,6 +3158,44 @@ class UTF8
 		}
 
 		return $s;
+	}
+
+	/**
+	 * Make regular expression for case insensitive match
+	 * Example (non ASCII): "123_слово_test" => "123_(с|С)(л|Л)(о|О)(в|В)(о|О)_[tT][eE][sS][tT]"
+	 * Example (only ASCII): "123_test" => "(?i:123_test)"
+	 *
+	 * @param  string $s
+	 * @param  string|null $delimiter  If the optional delimiter is specified, it will also be escaped.
+	 *                                 This is useful for escaping the delimiter that is required by the PCRE functions.
+	 *                                 The / is the most commonly used delimiter.
+	 * @return string|bool|null        Returns FALSE if error occured
+	 */
+	public static function preg_quote_case_insensitive($s, $delimiter = null)
+	{
+		if (! ReflectionTypeHint::isValid()) return false;
+		if (is_null($s)) return $s;
+
+		if (self::is_ascii($s)) return '(?i:' . preg_quote($s, $delimiter) . ')'; #speed improve
+
+		$s_re = '';
+		$s_lc = UTF8::lowercase($s); if ($s_lc === false) return false;
+		$s_uc = UTF8::uppercase($s); if ($s_uc === false) return false;
+
+		$chars_lc = UTF8::str_split($s_lc); if ($chars_lc === false) return false;
+		$chars_uc = UTF8::str_split($s_uc); if ($chars_uc === false) return false;
+
+		foreach ($chars_lc as $i => $char)
+		{
+			if ($chars_lc[$i] === $chars_uc[$i])
+				$s_re .= preg_quote($chars_lc[$i], $delimiter);
+			elseif (self::is_ascii($chars_lc[$i]))
+				$s_re .= '[' . preg_quote($chars_lc[$i] . $chars_uc[$i], $delimiter) . ']';
+			else
+				$s_re .= '(' . preg_quote($chars_lc[$i], $delimiter) . '|'
+							 . preg_quote($chars_uc[$i], $delimiter) . ')';
+		}
+		return $s_re;
 	}
 
 	/**
@@ -3378,10 +3424,18 @@ class UTF8
 		if (is_null($s)) return $s;
 
 		if ($offset === null || $offset < 0) $offset = 0;
-		if (self::is_ascii($s)) return stripos($s, $needle, $offset);
-		$s = self::convert_case($s, CASE_LOWER);
-		$needle = self::convert_case($needle, CASE_LOWER);
-		if ($s === false || $needle === false) return false;
+
+		#optimization block (speed improve)
+		#{{{
+		$ascii_int = intval(self::is_ascii($s)) + intval(self::is_ascii($needle));
+		if ($ascii_int === 1) return false;
+		if ($ascii_int === 2) return stripos($s, $needle, $offset);
+		#}}}
+
+		$s = self::convert_case($s, CASE_LOWER, false);
+		if ($s === false) return false;
+		$needle = self::convert_case($needle, CASE_LOWER, false);
+		if ($needle === false) return false;
 		return self::strpos($s, $needle, $offset);
 	}
 
@@ -3540,7 +3594,7 @@ class UTF8
 			return preg_replace_callback('/%u(  [\da-fA-F]{4}+          #%uXXXX     only UCS-2
                                               | \{ [\da-fA-F]{1,6}+ \}  #%u{XXXXXX} extended form for all UNICODE charts
                                              )
-                                          /sxSX', 
+                                          /sxSX',
 											function (array $m) use ($is_rawurlencode)
 											{
 												$codepoint = hexdec(trim($m[1], '{}'));
@@ -3973,6 +4027,11 @@ class UTF8
 			'"123-ABC-abc-АБВ-абв" === self::from_unicode(self::to_unicode("123-ABC-abc-АБВ-абв"))',
 			'self::strpos("123-ABC-abc-АБВ-абв", "АБВ") === 12',
 			'self::stripos("123-ABC-abc-АБВ-абв", "абв") === 12',
+			'self::strpos("123-ABC-abc", "АБВ") === false',
+			'self::strpos("123-АБВ-абв", "abc") === false',
+
+			'self::preg_quote_case_insensitive("123_слово_test") === "123_(с|С)(л|Л)(о|О)(в|В)(о|О)_[tT][eE][sS][tT]"',
+			'self::preg_quote_case_insensitive("123_test") === "(?i:123_test)"',
 
 			//'self::strlen(file_get_contents(' . var_export(__FILE__, true) . ', true))'
 		);
