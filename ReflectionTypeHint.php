@@ -1,17 +1,27 @@
 <?php
 /**
- * Класс для проверки входящих параметров методов на принадлежность типам через рефлексию.
- * Используется как более удобный вариант множественным assert(), стоящим после объявления методов.
+ * A class for validating method parameters to allowed types via reflection.
  *
- * В режиме отладки скриптов нужно использовать assert_options(ASSERT_ACTIVE, true)
- * В "боевом" режиме -- assert_options(ASSERT_ACTIVE, false)
+ * Purpose
+ *   Used as a more convenient multiple assert(), standing after the declaration of the methods.
  *
- * @link     http://www.ilia.ws/archives/205-Type-hinting-for-PHP-5.3.html
- * @link     http://php.net/manual/en/language.oop5.typehinting.php
+ * Features and advantage
+ *   * Very easy to use
+ *   * Ability to turn off on the production server
+ *
+ * WARNING
+ *   On a production server, it is important to disable assert, that would save server resources.
+ *   For this, use the assert_options(ASSERT_ACTIVE, false) or INI setting "assert.active 0".
+ *   In this case ReflectionTypeHint::isValid() always returns TRUE!
+ *
+ * Useful links
+ *   http://www.ilia.ws/archives/205-Type-hinting-for-PHP-5.3.html
+ *   http://php.net/manual/en/language.oop5.typehinting.php
+ * 
  * @example  ReflectionTypeHint_example.php
+ * @link     http://code.google.com/p/php5-reflection-type-hint/
  * @license  http://creativecommons.org/licenses/by-sa/3.0/
- * @author   Nasibullin Rinat: http://orangetie.ru/, http://rin-nas.moikrug.ru/
- * @charset  UTF-8
+ * @author   Nasibullin Rinat
  * @version  1.1.0
  */
 class ReflectionTypeHint
@@ -41,7 +51,7 @@ class ReflectionTypeHint
 		'callback' => 'is_callable',
 	);
 
-	#запрещаем создание экземпляра класса, вызов методов этого класса только статически!
+	#do not allow the creation of an instance of the class, call methods in this class only statically!
 	private function __construct() {}
 
 	public static function isValid()
@@ -153,7 +163,7 @@ class ReflectionTypeHint
 	}
 
 	/**
-	 * Проверяет переменную на соответствие указанным типам
+	 * Checks a value to the allowed types
 	 *
 	 * @param   array  $types
 	 * @param   mixed  $value
