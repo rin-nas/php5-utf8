@@ -51,7 +51,7 @@ class ReflectionTypeHint
 		'callback' => 'is_callable',
 	);
 
-	#do not allow the creation of an instance of the class, call methods in this class only statically!
+	#calling the methods of this class only statically!
 	private function __construct() {}
 
 	public static function isValid()

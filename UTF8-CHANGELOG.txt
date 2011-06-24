@@ -1,3 +1,9 @@
+2.2.2 / 2011-06-24
+
+	* Convert case functions improved: from all russian charsets to UTF8 native support was added
+	* UTF8::stripos() speed improved
+	* constant REPLACEMENT_CHAR added
+
 2.2.1 / 2011-06-08
 
 	* UTF8::preg_quote_case_insensitive() added

@@ -3,7 +3,7 @@
  * PHP5 UTF-8 is a UTF-8 aware library of functions mirroring PHP's own string functions.
  *
  * The powerful solution/contribution for UTF-8 support in your framework/CMS, written on PHP.
- * This package is advance of http://sourceforge.net/projects/phputf8 (last updated in 2007).
+ * This library is advance of http://sourceforge.net/projects/phputf8 (last updated in 2007).
  *
  * UTF-8 support in PHP 5.
  *
@@ -57,10 +57,13 @@
  * @link     http://code.google.com/p/php5-utf8/
  * @license  http://creativecommons.org/licenses/by-sa/3.0/
  * @author   Nasibullin Rinat
- * @version  2.2.1
+ * @version  2.2.2
  */
 class UTF8
 {
+	#REPLACEMENT CHARACTER (for broken char)
+	const REPLACEMENT_CHAR = "\xEF\xBF\xBD"; #U+FFFD
+
 	/**
 	 * Regular expression for a character in UTF-8 without the use of a flag /u
 	 * @deprecated  Instead, use a dot (".") and the flag /u, it works faster!
@@ -79,9 +82,9 @@ class UTF8
 
 	/**
 	 * Combining diactrical marks (Unicode 5.1).
-	 * Например, русские буквы Ё (U+0401) и Й (U+0419) существуют в виде монолитных символов,
-	 * хотя могут быть представлены и набором базового символа с последующим диакритическим знаком,
-	 * то есть в составной форме (Decomposed): (U+0415 U+0308), (U+0418 U+0306).
+	 *
+	 * For example, russian letters in composed form: "Ё" (U+0401), "Й" (U+0419),
+	 * decomposed form: (U+0415 U+0308), (U+0418 U+0306)
 	 *
 	 * @link http://www.unicode.org/charts/PDF/U0300.pdf
 	 * @link http://www.unicode.org/charts/PDF/U1DC0.pdf
@@ -89,10 +92,10 @@ class UTF8
 	 * @var  string
 	 */
 	#public static $diactrical_re = '\p{M}'; #alternative, but only with /u flag
-	public static $diactrical_re = '  \xcc[\x80-\xb9]|\xcd[\x80-\xaf]  #UNICODE range: U+0300 - U+036F (for letters)
-                                    | \xe2\x83[\x90-\xbf]              #UNICODE range: U+20D0 - U+20FF (for symbols)
-                                    | \xe1\xb7[\x80-\xbf]              #UNICODE range: U+1DC0 - U+1DFF (supplement)
-                                    | \xef\xb8[\xa0-\xaf]              #UNICODE range: U+FE20 - U+FE2F (combining half marks)
+	public static $diactrical_re = '  \xcc[\x80-\xb9]|\xcd[\x80-\xaf]  #UNICODE range: U+0300 — U+036F (for letters)
+                                    | \xe2\x83[\x90-\xbf]              #UNICODE range: U+20D0 — U+20FF (for symbols)
+                                    | \xe1\xb7[\x80-\xbf]              #UNICODE range: U+1DC0 — U+1DFF (supplement)
+                                    | \xef\xb8[\xa0-\xaf]              #UNICODE range: U+FE20 — U+FE2F (combining half marks)
                                    ';
 
 	/**
@@ -372,15 +375,11 @@ class UTF8
 	 * cp1259 -- this is an outdated one byte encoding of the Tatar language,
 	 * which includes all the Russian letters from cp1251.
 	 *
-	 * koi8-r -> UNICODE table:
-	 *   http://tools.ietf.org/html/rfc1489
-	 *   http://ru.wikipedia.org/wiki/КОИ-8
-	 *
 	 * @link  http://search.cpan.org/CPAN/authors/id/A/AM/AMICHAUER/Lingua-TT-Yanalif-0.08.tar.gz
 	 * @link  http://www.unicode.org/charts/PDF/U0400.pdf
 	 */
 	public static $cp1259_table = array(
-		#от 0x00 до 0x7F (ASCII) байты сохраняются как есть
+		#bytes from 0x00 to 0x7F (ASCII) saved as is
 		"\x80" => "\xd3\x98",      #U+04d8 CYRILLIC CAPITAL LETTER SCHWA
 		"\x81" => "\xd0\x83",      #U+0403 CYRILLIC CAPITAL LETTER GJE
 		"\x82" => "\xe2\x80\x9a",  #U+201a SINGLE LOW-9 QUOTATION MARK
@@ -2228,7 +2227,7 @@ class UTF8
 		),
 	);
 
-	#запрещаем создание экземпляра класса, вызов методов этого класса только статически!
+	#calling the methods of this class only statically!
 	private function __construct() {}
 
 	/**
@@ -2239,7 +2238,7 @@ class UTF8
 	 * @param   array|null        $additional_chars   for example: "\xc2\xad"  #soft hyphen = discretionary hyphen
 	 * @param   bool              $is_can_restored
 	 * @param   array|null        &$restore_table
-	 * @return  string|bool|null  returns FALSE if error occured
+	 * @return  string|bool|null  Returns FALSE if error occurred
 	 */
 	public static function diactrical_remove($s, $additional_chars = null, $is_can_restored = false, &$restore_table = null)
 	{
@@ -2273,12 +2272,13 @@ class UTF8
 
 	/**
 	 * Restore combining diactrical marks, removed by self::diactrical_remove()
+	 * In Russian:
 	 * Восстанавливает диакритические знаки в тексте, при условии, что их символьные позиции и кол-во символов не изменились!
 	 *
 	 * @see     self::diactrical_remove()
 	 * @param   string|null       $s
 	 * @param   array             $restore_table
-	 * @return  string|bool|null  returns FALSE if error occured (broken $restore_table)
+	 * @return  string|bool|null  Returns FALSE if error occurred (broken $restore_table)
 	 */
 	public static function diactrical_restore($s, array $restore_table)
 	{
@@ -2302,11 +2302,11 @@ class UTF8
 	}
 
 	/**
-	 * Функция для перекодировки данных произвольной структуры из какой-либо кодировки в кодировку UTF-8.
+	 * Encodes data from another character encoding to UTF-8.
 	 *
 	 * @param   array|scalar|null  $data
 	 * @param   string             $charset
-	 * @return  array|scalar|null  returns FALSE if error occured
+	 * @return  array|scalar|null  Returns FALSE if error occurred
 	 */
 	public static function convert_from($data, $charset = 'cp1251')
 	{
@@ -2315,11 +2315,11 @@ class UTF8
 	}
 
 	/**
-	 * Функция для перекодировки данных произвольной структуры из кодировки UTF-8 в другую кодировку.
+	 * Encodes data from UTF-8 to another character encoding.
 	 *
 	 * @param   array|scalar|null  $data
 	 * @param   string             $charset
-	 * @return  array|scalar|null  returns FALSE if error occured
+	 * @return  array|scalar|null  Returns FALSE if error occurred
 	 */
 	public static function convert_to($data, $charset = 'cp1251')
 	{
@@ -2328,13 +2328,14 @@ class UTF8
 	}
 
 	/**
-	 * Функция для перекодировки данных произвольной структуры из/в кодировку UTF-8.
-	 * Массивы обходятся рекурсивно, при этом перекодируются как ключи, так и значения элементов массива.
+	 * Recoding the data of any structure to/from UTF-8.
+	 * Arrays traversed recursively, recoded keys and values.
 	 *
+	 * @see mb_encoding_aliases()
 	 * @param   array|scalar|null  $data
 	 * @param   string             $charset_from
 	 * @param   string             $charset_to
-	 * @return  array|scalar|null  returns FALSE if error occured
+	 * @return  array|scalar|null  Returns FALSE if error occurred
 	 */
 	private static function _convert($data, $charset_from, $charset_to)
 	{
@@ -2354,14 +2355,32 @@ class UTF8
 		}
 		if (is_string($data))
 		{
-			if ($charset_from === 'UTF-8' && ! self::is_utf8($data)) return $data;  #smart behaviour
-			if ($charset_to === 'UTF-8' && self::is_utf8($data)) return $data;  #smart behaviour
+			#smart behaviour for errors protected + speed improve
+			if ($charset_from === 'UTF-8' && ! self::is_utf8($data)) return $data;
+			if ($charset_to === 'UTF-8' && self::is_utf8($data)) return $data;
+
 			#since PHP-5.3.x iconv() faster then mb_convert_encoding()
 			if (function_exists('iconv')) return iconv($charset_from, $charset_to . '//IGNORE//TRANSLIT', $data);
 			if (function_exists('mb_convert_encoding')) return mb_convert_encoding($data, $charset_to, $charset_from);
-			if ($charset_from === 'cp1251' || $charset_from === 'cp1259') return strtr($data, self::$cp1259_table);
-			if ($charset_to   === 'cp1251' || $charset_to   === 'cp1259') return strtr($data, array_flip(self::$cp1259_table));
+
+			#charset_from
 			if ($charset_from === 'UTF-16' || $charset_from === 'UCS-2')  return self::_convert_from_utf16($data);
+			if ($charset_from === 'cp1251' || $charset_from === 'cp1259') return strtr($data, self::$cp1259_table);
+			if ($charset_from === 'koi8-r' || $charset_from === 'KOI8-R') return strtr(convert_cyr_string($data, 'k', 'w'), self::$cp1259_table);
+			if ($charset_from === 'iso8859-5') return strtr(convert_cyr_string($data, 'i', 'w'), self::$cp1259_table);
+			if ($charset_from === 'cp866') return strtr(convert_cyr_string($data, 'a', 'w'), self::$cp1259_table);
+			if ($charset_from === 'mac-cyrillic') return strtr(convert_cyr_string($data, 'm', 'w'), self::$cp1259_table);
+
+			#charset_to
+			if ($charset_to === 'cp1251' || $charset_to === 'cp1259') return strtr($data, array_flip(self::$cp1259_table));
+
+			#last trying
+			if (function_exists('recode_string'))
+			{
+				$s = @recode_string($charset_from . '..' . $charset_to, $data);
+				if (is_string($s)) return $s;
+			}
+
 			trigger_error('Convert "' . $charset_from . '" --> "' . $charset_to . '" is not supported native, "iconv" or "mbstring" extension required', E_USER_WARNING);
 			return false;
 		}
@@ -2371,7 +2390,8 @@ class UTF8
 	/**
 	 * Convert UTF-16 / UCS-2 encoding string to UTF-8.
 	 * Surrogates UTF-16 are supported!
-	 *
+	 * 
+	 * In Russian:
 	 * Преобразует строку из кодировки UTF-16 / UCS-2 в UTF-8.
 	 * Суррогаты UTF-16 поддерживаются!
 	 *
@@ -2379,7 +2399,7 @@ class UTF8
 	 * @param    string        $type      'BE' -- big endian byte order
 	 *                                    'LE' -- little endian byte order
 	 * @param    bool          $to_array  returns array chars instead whole string?
-	 * @return   string|array|bool        UTF-8 string, array chars or FALSE if error occured
+	 * @return   string|array|bool        UTF-8 string, array chars or FALSE if error occurred
 	 */
 	private static function _convert_from_utf16($s, $type = 'BE', $to_array = false)
 	{
@@ -2456,8 +2476,8 @@ class UTF8
 	/**
 	 * Strips out device control codes in the ASCII range.
 	 *
-	 * @param   string|null       string to clean
-	 * @return  string|bool|null  returns FALSE if error occured
+	 * @param   string|null       String to clean
+	 * @return  string|bool|null  Returns FALSE if error occurred
 	 */
 	public static function strict($s)
 	{
@@ -2467,8 +2487,8 @@ class UTF8
 	}
 
 	/**
-	 * Проверка данных на принадлежность классу символов ASCII
-	 * Для значений null, integer, float, boolean возвращает TRUE.
+	 * Check the data accessory to the class of characters ASCII.
+	 * For null, integer, float, boolean returns TRUE.
 	 *
 	 * Массивы обходятся рекурсивно, если в хотябы одном элементе массива
 	 * его значение не ASCII, возвращается FALSE.
@@ -2496,17 +2516,17 @@ class UTF8
 
 	/**
 	 * Returns true if data is valid UTF-8 and false otherwise.
-	 * Для значений null, integer, float, boolean возвращает TRUE.
+	 * For null, integer, float, boolean returns TRUE.
 	 *
-	 * Массивы обходятся рекурсивно, если в хотябы одном элементе массива
-	 * его значение не в кодировке UTF-8, возвращается FALSE.
+	 * The arrays are traversed recursively, if At least one element of the array
+	 * its value is not in UTF-8, returns FALSE.
 	 *
 	 * @link    http://www.w3.org/International/questions/qa-forms-utf-8.html
 	 * @link    http://ru3.php.net/mb_detect_encoding
 	 * @link    http://webtest.philigon.ru/articles/utf8/
 	 * @link    http://unicode.coeurlumiere.com/
 	 * @param   array|scalar|null  $data
-	 * @param   bool               $is_strict  строгая проверка диапазона ASCII?
+	 * @param   bool               $is_strict  strict the range of ASCII?
 	 * @return  bool
 	 */
 	public static function is_utf8($data, $is_strict = true)
@@ -2572,12 +2592,12 @@ class UTF8
 	 * Check the data in UTF-8 charset on given ranges of the standard UNICODE.
 	 * The suitable alternative to regular expressions.
 	 *
-	 * Для значений null, integer, float, boolean возвращает TRUE.
+	 * For null, integer, float, boolean returns TRUE.
 	 *
-	 * Массивы обходятся рекурсивно, если в хотябы одном элементе массива
-	 * его значение не прошло проверку, возвращается FALSE.
+	 * Arrays traversed recursively (keys and values).
+	 * At least if one array element value is not passed checking, it returns FALSE.
 	 *
-	 * Examples:
+	 * @example
 	 *   #A simple check the standard named ranges:
 	 *   UTF8::blocks_check('поисковые системы Google и Yandex', array('Basic Latin', 'Cyrillic'));
 	 *   #You can check the named, direct ranges or codepoints together:
@@ -2650,10 +2670,10 @@ class UTF8
 	}
 
 	/**
-	 * Перекодирует значения элементов массивов $_GET, $_POST, $_COOKIE, $_REQUEST, $_FILES из кодировки $charset в UTF-8, если необходимо.
-	 * Побочным положительным эффектом является защита от XSS атаки с непечатаемыми символами на уязвимые PHP функции.
-	 * Т.о. веб-формы можно посылать на сервер в 2-х кодировках: $charset и UTF-8.
-	 * Параметры для тестирования: ?тест[тест]=тест (можно просто дописать в адресную строку браузера IE >= 5.x)
+	 * Recode $_GET, $_POST, $_COOKIE, $_REQUEST, $_FILES from $charset encoding to UTF-8, if necessary.
+	 * A side effect is a positive protection against XSS attacks with non-printable characters on the vulnerable PHP function.
+	 * Thus web forms can be sent to the server in 2-encoding: $charset and UTF-8.
+	 * For example: ?тест[тест]=тест
 	 *
 	 * Алгоритм работы:
 	 * 1) Функция проверяет массивы $_GET, $_POST, $_COOKIE, $_REQUEST, $_FILES
@@ -2749,7 +2769,7 @@ class UTF8
 	 * @param   string|null    $s1
 	 * @param   string|null    $s2
 	 * @param   string         $locale   For example, 'en_CA', 'ru_RU'
-	 * @return  int|bool|null  Returns FALSE if error occured
+	 * @return  int|bool|null  Returns FALSE if error occurred
 	 *                         Returns < 0 if $s1 is less than $s2;
 	 *                                 > 0 if $s1 is greater than $s2;
 	 *                                 0 if they are equal.
@@ -2777,7 +2797,7 @@ class UTF8
 	 * @param   string|null    $s1
 	 * @param   string|null    $s2
 	 * @param   int            $length
-	 * @return  int|bool|null  Returns FALSE if error occured
+	 * @return  int|bool|null  Returns FALSE if error occurred
 	 *                         Returns < 0 if $s1 is less than $s2;
 	 *                                 > 0 if $s1 is greater than $s2;
 	 *                                 0 if they are equal.
@@ -2794,7 +2814,7 @@ class UTF8
 	 *
 	 * @param   string|null    $s1
 	 * @param   string|null    $s2
-	 * @return  int|bool|null  Returns FALSE if error occured
+	 * @return  int|bool|null  Returns FALSE if error occurred
 	 *                         Returns < 0 if $s1 is less than $s2;
 	 *                                 > 0 if $s1 is greater than $s2;
 	 *                                 0 if they are equal.
@@ -2835,7 +2855,7 @@ class UTF8
 	 *
 	 * @param   array|null       $a  Unicode codepoints
 	 * @return  string|bool|null     UTF-8 string
-	 *                               Returns FALSE if error occured
+	 *                               Returns FALSE if error occurred
 	 */
 	public static function from_unicode($a)
 	{
@@ -2899,7 +2919,7 @@ class UTF8
 	 *
 	 * @param   int|digit|null  $cp  Unicode codepoint
 	 * @return  string|bool|null     UTF-8 character
-	 *                               Returns FALSE if error occured
+	 *                               Returns FALSE if error occurred
 	 */
 	public static function chr($cp)
 	{
@@ -2929,7 +2949,7 @@ class UTF8
 	 * @param   string|null       $s
 	 * @param   int|digit|null    $length
 	 * @param   string|null       $glue
-	 * @return  string|bool|null  returns FALSE if error occured
+	 * @return  string|bool|null  Returns FALSE if error occurred
 	 */
 	public static function chunk_split($s, $length = null, $glue = null)
 	{
@@ -2949,7 +2969,7 @@ class UTF8
 	 *
 	 * @param   array|null       $a
 	 * @param   int              $mode  {CASE_LOWER|CASE_UPPER}
-	 * @return  array|bool|null  returns FALSE if error occured
+	 * @return  array|bool|null  Returns FALSE if error occurred
 	 */
 	public static function array_change_key_case($a, $mode)
 	{
@@ -2980,7 +3000,7 @@ class UTF8
 	 * @param   array|scalar|null $data  Данные произвольной структуры
 	 * @param   int               $mode  {CASE_LOWER|CASE_UPPER}
 	 * @param   bool              $is_ascii_optimization    for speed improve
-	 * @return  scalar|bool|null  returns FALSE if error occured
+	 * @return  scalar|bool|null  Returns FALSE if error occurred
 	 */
 	public static function convert_case($data, $mode, $is_ascii_optimization = true)
 	{
@@ -3015,8 +3035,7 @@ class UTF8
 	 * Convert a data to lower case
 	 *
 	 * @param   array|scalar|null  $data
-	 * @return  scalar|bool|null   Returns FALSE if error occured
-	 */
+	 * @return  scalar|bool|null   Returns FALSE if error occurred	 */
 	public static function lowercase($data)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
@@ -3027,7 +3046,7 @@ class UTF8
 	 * Convert a data to upper case
 	 *
 	 * @param   array|scalar|null  $data
-	 * @return  scalar|null        Returns FALSE if error occured
+	 * @return  scalar|null        Returns FALSE if error occurred
 	 */
 	public static function uppercase($data)
 	{
@@ -3039,7 +3058,7 @@ class UTF8
 	 * Convert a data to lower case
 	 *
 	 * @param   array|scalar|null  $data
-	 * @return  scalar|bool|null   Returns FALSE if error occured
+	 * @return  scalar|bool|null   Returns FALSE if error occurred
 	 */
 	public static function strtolower($data)
 	{
@@ -3051,7 +3070,7 @@ class UTF8
 	 * Convert a data to upper case
 	 *
 	 * @param   array|scalar|null  $data
-	 * @return  scalar|null        Returns FALSE if error occured
+	 * @return  scalar|null        Returns FALSE if error occurred
 	 */
 	public static function strtoupper($data)
 	{
@@ -3075,7 +3094,7 @@ class UTF8
 	 *
 	 * @param   scalar|null  $s
 	 * @param   bool         $is_special_chars   Дополнительно обрабатывать специальные html сущности? (&lt; &gt; &amp; &quot;)
-	 * @return  scalar|null  returns FALSE if error occured
+	 * @return  scalar|null  Returns FALSE if error occurred
 	 */
 	public static function html_entity_decode($s, $is_special_chars = false)
 	{
@@ -3132,7 +3151,7 @@ class UTF8
 	 *
 	 * @param   scalar|null  $s
 	 * @param   bool         $is_special_chars_only          Обрабатывать только специальные html сущности? (&lt; &gt; &amp; &quot;)
-	 * @return  scalar|null  Returns FALSE if error occured
+	 * @return  scalar|null  Returns FALSE if error occurred
 	 */
 	public static function html_entity_encode($s, $is_special_chars_only = false)
 	{
@@ -3169,7 +3188,7 @@ class UTF8
 	 * @param  string|null $delimiter  If the optional delimiter is specified, it will also be escaped.
 	 *                                 This is useful for escaping the delimiter that is required by the PCRE functions.
 	 *                                 The / is the most commonly used delimiter.
-	 * @return string|bool|null        Returns FALSE if error occured
+	 * @return string|bool|null        Returns FALSE if error occurred
 	 */
 	public static function preg_quote_case_insensitive($s, $delimiter = null)
 	{
@@ -3209,7 +3228,7 @@ class UTF8
 	 * @param   array            $matches
 	 * @param   int              $flags
 	 * @param   int              $char_offset
-	 * @return  array|bool|null  returns FALSE if error occured
+	 * @return  array|bool|null  Returns FALSE if error occurred
 	 */
 	public static function preg_match_all($pattern, $subject, &$matches, $flags = PREG_PATTERN_ORDER, $char_offset = 0)
 	{
@@ -3249,7 +3268,7 @@ class UTF8
 	 * @param   bool|null       &$is_cutted       Текст был обрезан?
 	 * @param   int|digit       $tail_min_length  Если длина "хвоста", оставшегося после обрезки текста, меньше $tail_min_length,
 	 *                                            то текст возвращается без изменений
-	 * @return  string|bool|null                  Returns FALSE if error occured
+	 * @return  string|bool|null                  Returns FALSE if error occurred
 	 */
 	public static function str_limit($s, $maxlength = null, $continue = "\xe2\x80\xa6", &$is_cutted = null, $tail_min_length = 20) #"\xe2\x80\xa6" = "&hellip;"
 	{
@@ -3320,7 +3339,7 @@ class UTF8
 	 *
 	 * @param   string|null      $s
 	 * @param   int|null|digit   $length
-	 * @return  array|bool|null  returns FALSE if error occured
+	 * @return  array|bool|null  Returns FALSE if error occurred
 	 */
 	public static function str_split($s, $length = null)
 	{
@@ -3345,7 +3364,7 @@ class UTF8
 	 * Implementation strlen() function for UTF-8 encoding string.
 	 *
 	 * @param   string|null    $s
-	 * @return  int|bool|null  returns FALSE if error occured
+	 * @return  int|bool|null  Returns FALSE if error occurred
 	 */
 	public static function strlen($s)
 	{
@@ -3424,6 +3443,7 @@ class UTF8
 		if (is_null($s)) return $s;
 
 		if ($offset === null || $offset < 0) $offset = 0;
+		if (function_exists('mb_stripos')) return mb_stripos($s, $needle, $offset, 'utf-8');
 
 		#optimization block (speed improve)
 		#{{{
@@ -3443,14 +3463,14 @@ class UTF8
 	 * Implementation strrev() function for UTF-8 encoding string
 	 *
 	 * @param   string|null       $s
-	 * @return  string|bool|null  returns FALSE if error occured
+	 * @return  string|bool|null  Returns FALSE if error occurred
 	 */
 	public static function strrev($s)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
 		if (is_null($s)) return $s;
 
-		if (0) #TODO протестировать скорость работы
+		if (0) #TODO test speed
 		{
 			$s = self::_convert($s, 'UTF-8', 'UTF-32');
 			if (! is_string($s)) return false;
@@ -3469,7 +3489,7 @@ class UTF8
 	 * @param    string|null       $s
 	 * @param    int|digit         $offset
 	 * @param    int|null|digit    $length
-	 * @return   string|bool|null             returns FALSE if error occured
+	 * @return   string|bool|null             Returns FALSE if error occurred
 	 */
 	public static function substr($s, $offset, $length = null)
 	{
@@ -3505,7 +3525,7 @@ class UTF8
 	 * @param   string|int        $replacement
 	 * @param   int|digit         $start
 	 * @param   int|null          $length
-	 * @return  string|bool|null  returns FALSE if error occured
+	 * @return  string|bool|null  Returns FALSE if error occurred
 	 */
 	public static function substr_replace($s, $replacement, $start, $length = null)
 	{
@@ -3523,7 +3543,7 @@ class UTF8
 	 *
 	 * @param   string|null       $s
 	 * @param   bool              $is_other_to_lowercase  остальные символы преобразуются в нижний регистр?
-	 * @return  string|bool|null  returns FALSE if error occured
+	 * @return  string|bool|null  Returns FALSE if error occurred
 	 */
 	public static function ucfirst($s, $is_other_to_lowercase = true)
 	{
@@ -3543,7 +3563,7 @@ class UTF8
 	 * @param   string|null       $s
 	 * @param   bool              $is_other_to_lowercase  остальные символы преобразуются в нижний регистр?
 	 * @param   string            $spaces_re
-	 * @return  string|bool|null  returns FALSE if error occured
+	 * @return  string|bool|null  Returns FALSE if error occurred
 	 */
 	public static function ucwords($s, $is_other_to_lowercase = true, $spaces_re = '~([\pZ\s]+)~suSX') #\pXps is POSIX space: property Z or tab, NL, VT, FF, CR
 	{
@@ -3560,9 +3580,9 @@ class UTF8
 	}
 
 	/**
-	 * Функция декодирует строку в формате %uXXXX или %u{XXXXXX} в строку формата UTF-8.
+	 * Decodes a string in the format %uXXXX or %u{XXXXXX} in the UTF-8 string.
 	 *
-	 * Функция используется для декодирования данных типа "%u0442%u0435%u0441%u0442",
+	 * Используется для декодирования данных типа "%u0442%u0435%u0441%u0442",
 	 * закодированных устаревшей функцией javascript://encode().
 	 * Рекомендуется использовать функцию javascript://encodeURIComponent().
 	 *
@@ -3571,7 +3591,7 @@ class UTF8
 	 *
 	 * @param   scalar|array|null  $data
 	 * @param   bool               $is_rawurlencode
-	 * @return  scalar|array|null  returns FALSE if error occured
+	 * @return  scalar|array|null  Returns FALSE if error occurred
 	 */
 	public static function unescape($data, $is_rawurlencode = false)
 	{
@@ -3608,12 +3628,14 @@ class UTF8
 	}
 
 	/**
-	 * 1) Корректирует глобальные массивы $_GET, $_POST, $_COOKIE, $_REQUEST
-	 *    декодируя значения в юникоде "%uXXXX" и %u{XXXXXX}, закодированные, например, через устаревшую функцию javascript escape()
-	 *    Cтандартный PHP 5.2.x этого делать не умеет.
-	 * 2) Если в HTTP_COOKIE есть параметры с одинаковым именем, то берётся последнее значение, а не первое, как в QUERY_STRING.
-	 * 3) Создаёт массив $_POST для нестандартных Content-Type, например, "Content-Type: application/octet-stream".
-	 *    Стандартный PHP 5.2.x создаёт массив только для "Content-Type: application/x-www-form-urlencoded" и "Content-Type: multipart/form-data".
+	 * 1) Corrects the global arrays $_GET, $_POST, $_COOKIE, $_REQUEST
+	 *    decoded values ​​in the format %uXXXX and %u{XXXXXX}, encoded,
+	 *    for example, through an outdated javascript function escape().
+	 *    Standard PHP5 cannot do it.
+	 * 2) If in the HTTP_COOKIE there are parameters with the same name,
+	 *    takes the last value, not the first, as in the QUERY_STRING.
+	 * 3) Creates an array of $_POST for non-standard Content-Type, for example, "Content-Type: application/octet-stream".
+	 *    Standard PHP5 creates an array for "Content-Type: application/x-www-form-urlencoded" and "Content-Type: multipart/form-data".
 	 *
 	 * Сессии, куки и независимая авторизация на поддоменах.
 	 *
@@ -3686,18 +3708,18 @@ class UTF8
 	}
 
 	/**
-	 * Вычисляет высоту области редактирования текста (<textarea>) по значению и ширине.
+	 * Calculates the height of the edit text in <textarea> html tag by value and width.
 	 *
 	 * В большинстве случаев будет корректно работать для моноширинных шрифтов.
 	 * Т.к. браузер переносит последнее слово, которое не умещается на строке,
 	 * на следующую строку, высота м.б. меньше ожидаемой.
 	 * Этот алгоритм явл. простым (и быстрым) и не отслеживает переносы слов.
 	 *
-	 * @param   string|null     $s         текст
-	 * @param   int|digit       $cols      ширина области редактирования (колонок)
-	 * @param   int|digit       $min_rows  минимальное кол-во строк
-	 * @param   int|digit       $max_rows  максимальное кол-во строк
-	 * @return  int|bool|null
+	 * @param   string|null     $s         Текст
+	 * @param   int|digit       $cols      Ширина области редактирования (колонок)
+	 * @param   int|digit       $min_rows  Минимальное кол-во строк
+	 * @param   int|digit       $max_rows  Максимальное кол-во строк
+	 * @return  int|bool|null              Number of rows (lines)
 	 */
 	public static function textarea_rows($s, $cols, $min_rows = 3, $max_rows = 32)
 	{
@@ -3832,21 +3854,22 @@ class UTF8
 	}
 
 	/**
-	 * Перекодирует текстовые файлы в указанной папке в кодировку UTF-8
-	 * При обработке пропускаются бинарные файлы, файлы в кодировке UTF-8 и файлы, которые перекодировать не удалось.
-	 * Т. о. метод работает достаточно надёжно.
+	 * Recode the text files in a specified folder in the UTF-8
+	 * In the processing skipped binary files, files encoded in UTF-8, files that could not convert.
+	 * So method works reliably enough.
 	 *
-	 * @param   string       $dir             директория для сканирования
-	 * @param   string|null  $files_re        регул. выражение для шаблона имён файлов,
+	 *
+	 * @param   string       $dir             Директория для сканирования
+	 * @param   string|null  $files_re        Регул. выражение для шаблона имён файлов,
 	 *                                        например: '~\.(?:txt|sql|php|pl|py|sh|tpl|xml|xsl|html|xhtml|phtml|htm|js|json|css|conf|cfg|ini|htaccess)$~sSX'
-	 * @param   bool         $is_recursive    обрабатывать вложенные папки и файлы?
-	 * @param   string       $charset         исходная кодировка
-	 * @param   string|null  $dirs_ignore_re  регул. выражение для исключения папок из обработки
+	 * @param   bool         $is_recursive    Обрабатывать вложенные папки и файлы?
+	 * @param   string       $charset         Исходная кодировка
+	 * @param   string|null  $dirs_ignore_re  Регул. выражение для исключения папок из обработки
 	 *                                        например: '~^(?:cache|images?|photos?|fonts?|img|ico|\.svn|\.hg|\.cvs)$~siSX'
-	 * @param   bool         $is_echo         печать имён обработанных файлов и статус обработки в выходной поток?
-	 * @param   bool         $is_simulate     сымитировать работу без реальной перезаписи файлов?
-	 * @return  int|bool                      возвращает кол-во перекодированных файлов
-	 *                                        returns FALSE if error occured
+	 * @param   bool         $is_echo         Печать имён обработанных файлов и статус обработки в выходной поток?
+	 * @param   bool         $is_simulate     Сымитировать работу без реальной перезаписи файлов?
+	 * @return  int|bool                      Возвращает кол-во перекодированных файлов
+	 *                                        Returns FALSE if error occurred
 	 */
 	public static function convert_files_from(
 		$dir,
@@ -3936,7 +3959,7 @@ class UTF8
 	 * @param   int|string  $low
 	 * @param   int|string  $high
 	 * @param   int         $step
-	 * @return  array|bool         returns FALSE if error occured
+	 * @return  array|bool         Returns FALSE if error occurred
 	 */
 	public static function range($low, $high, $step = 1)
 	{
@@ -3954,7 +3977,7 @@ class UTF8
 	 * @param   string|null       $s
 	 * @param   string|array      $from
 	 * @param   string|null       $to
-	 * @return  string|bool|null         returns FALSE if error occured
+	 * @return  string|bool|null         Returns FALSE if error occurred
 	 */
 	public static function strtr($s, $from, $to = null)
 	{
@@ -4025,8 +4048,8 @@ class UTF8
 
 			'"↔" === self::chr(self::ord("↔"))',
 			'"123-ABC-abc-АБВ-абв" === self::from_unicode(self::to_unicode("123-ABC-abc-АБВ-абв"))',
-			'self::strpos("123-ABC-abc-АБВ-абв", "АБВ") === 12',
-			'self::stripos("123-ABC-abc-АБВ-абв", "абв") === 12',
+			'self::strpos("123-ABC-abc-абв-АБВ-где", "АБВ") === 16',
+			'self::stripos("123-ABC-abc-абд-АБВ-где", "абв") === 16',
 			'self::strpos("123-ABC-abc", "АБВ") === false',
 			'self::strpos("123-АБВ-абв", "abc") === false',
 
