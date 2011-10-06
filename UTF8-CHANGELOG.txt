@@ -1,8 +1,25 @@
+2.3.0 / 2011-10-06
+
+	* Constants BOM, CHAR_UPPER_RE, CHAR_LOWER_RE, HTML_ENTITY_RE added
+	* UTF8::has_binary() - new method added
+	* UTF8::strict() - recursive support added
+	* UTF8::$char_re renamed to constant CHAR_RE,
+	  UTF8::$diactrical_re renamed to constant DIACTRICAL_RE
+	* UTF8::unescape_request() - improved, $charset parameter added
+	* UTF8::unescape() - improved and interface changed from
+	  ($data, $is_rawurlencode = false) to ($data, $is_hex2bin = false, $is_urldecode = true)
+	* UTF8::autoconvert_request() removed, use UTF8::unescape_request() instead
+	* UTF8::is_ascii() - recursive support removed (was ambiguity),
+	  second paramether added, for non string/int/float always returns FALSE
+	* UTF8::blocks_check() - for non string/int/float always returns FALSE
+	* UTF8::str_limit() - small internal improved
+	* UTF8::preg_quote_case_insensitive() - speed improved
+
 2.2.2 / 2011-06-24
 
 	* Convert case functions improved: from all russian charsets to UTF8 native support was added
 	* UTF8::stripos() speed improved
-	* constant REPLACEMENT_CHAR added
+	* Constant REPLACEMENT_CHAR added
 
 2.2.1 / 2011-06-08
 
