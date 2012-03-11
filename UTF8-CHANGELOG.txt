@@ -1,3 +1,16 @@
+2.3.1 / 2012-03-11
+
+	* UTF8::QUOTATION_MARK_RE new constant added
+	* UTF8::$html_quotation_mark_table added
+	* UTF8::ucfirst() improved
+	* UTF8::ucwords() improved
+	* UTF8::convert_files_from() improved
+	* UTF8::array_change_key_case() recursive support added
+	* UTF8::html_entity_encode() binary support
+	* UTF8::html_entity_decode() &apos; entity support
+	* UTF8::str_limit() syntax error: "preg_relace" instead of "preg_replace"
+	* Small bugs fixed
+
 2.3.0 / 2011-10-06
 
 	* Constants BOM, CHAR_UPPER_RE, CHAR_LOWER_RE, HTML_ENTITY_RE added
