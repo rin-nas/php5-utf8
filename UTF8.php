@@ -1,11 +1,10 @@
 <?php
 /**
- * PHP5 UTF-8 is a UTF-8 aware library of functions mirroring PHP's own string functions.
+ * UTF8 support in PHP5.
+ * PHP5 UTF8 is a UTF8 aware library of functions mirroring PHP's own string functions.
  *
  * The powerful solution/contribution for UTF-8 support in your framework/CMS, written on PHP.
  * This library is advance of http://sourceforge.net/projects/phputf8 (last updated in 2007).
- *
- * UTF-8 support in PHP 5.
  *
  * Features and benefits
  *   * Compatibility with the interface standard PHP functions that deal with single-byte encodings
