@@ -112,4 +112,4 @@ Example:
     $s = 'Hello, Привет';
     if (UTF8::is_utf8($s)) echo UTF8::strlen($s);
   
-Project exported from http://code.google.com/p/php5-utf8
+Project was exported from http://code.google.com/p/php5-utf8
