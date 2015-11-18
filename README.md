@@ -9,7 +9,7 @@ This library is advance of http://sourceforge.net/projects/phputf8 (last updated
 1. Ability to work without PHP extensions ICONV and MBSTRING, if any, that are actively used! Uses the fastest available method between MBSTRING, ICONV, native on PHP and hacks.
 1. Useful features are missing from the ICONV and MBSTRING
 1. The methods that take and return a string, are able to take and return null. This useful for selects from a database.
-1. Several methods are able to process arrays recursively: array_change_key_case(), convert_from(), convert_to(), strict(), is_utf8(), blocks_check(), convert_case(), lowercase(), uppercase(), unescape()
+1. Several methods are able to process arrays recursively: `array_change_key_case()`, `convert_from()`, `convert_to()`, `strict()`, `is_utf8()`, `blocks_check()`, `convert_case()`, `lowercase()`, `uppercase()`, `unescape()`
 1. Validating method parameters to allowed types via reflection (You can disable it)
 1. A single interface and encapsulation, You can inherit and override
 1. Test coverage
@@ -24,32 +24,32 @@ Example:
 
 ### Alphabetical order list
 
-1. array_change_key_case()
-1. chr() — Converts a UNICODE codepoint to a UTF-8 character
-1. chunk_split()
-1. ltrim()
-1. ord() — Converts a UTF-8 character to a UNICODE codepoint
-1. preg_match_all() — Call preg_match_all() and convert byte offsets into character offsets for PREG_OFFSET_CAPTURE flag. This is regardless of whether you use /u modifier.
-1. range()
-1. rtrim()
-1. str_pad()
-1. str_split()
-1. strcasecmp()
-1. strcmp()
-1. stripos()
-1. strlen()
-1. strncmp()
-1. strpos()
-1. strrev()
-1. strspn()
-1. strtolower(), lowercase() is alias
-1. strtoupper(), uppercase() is alias
-1. strtr()
-1. substr()
-1. substr_replace()
-1. trim()
-1. ucfirst()
-1. ucwords()
+1. `array_change_key_case()`
+1. `chr()` — Converts a UNICODE codepoint to a UTF-8 character
+1. `chunk_split()`
+1. `ltrim()`
+1. `ord()` — Converts a UTF-8 character to a UNICODE codepoint
+1. `preg_match_all()` — Call `preg_match_all()` and convert byte offsets into character offsets for `PREG_OFFSET_CAPTURE` flag. This is regardless of whether you use `/u` modifier.
+1. `range()`
+1. `rtrim()`
+1. `str_pad()`
+1. `str_split()`
+1. `strcasecmp()`
+1. `strcmp()`
+1. `stripos()`
+1. `strlen()`
+1. `strncmp()`
+1. `strpos()`
+1. `strrev()`
+1. `strspn()`
+1. `strtolower()`, `lowercase()` is alias
+1. `strtoupper()`, `uppercase()` is alias
+1. `strtr()`
+1. `substr()`
+1. `substr_replace()`
+1. `trim()`
+1. `ucfirst()`
+1. `ucwords()`
 
 ## Extra useful functions for UTF-8 encoding string
 
@@ -74,19 +74,17 @@ Example:
 1. `textarea_rows()` — Calculates the height of the edit text in \<textarea\> html tag by value and width.
 1. `to_unicode()` — Converts a UTF-8 string to a UNICODE codepoints
 1. `unescape()` — Decodes a string to UTF-8 string from some formats (can be mixed)
-1. `unescape_request()` — Corrects the global arrays $_GET, $_POST, $_COOKIE, $_REQUEST, $_FILES decoded values from %XX and extended %uXXXX / %u{XXXXXX} format, for example, through an outdated javascript function escape(). Standard PHP5 cannot do it.
-Recode $_GET, $_POST, $_COOKIE, $_REQUEST, $_FILES from $charset encoding to UTF-8, if necessary. A side effect is a positive protection against XSS attacks with non-printable characters on the vulnerable PHP function. Thus web forms can be sent to the server in 2-encoding: $charset and UTF-8. For example: ?тест[тест]=тест
-If in the HTTP_COOKIE there are parameters with the same name, takes the last value (as in the QUERY_STRING), not the first.
-Creates an array of $_POST for non-standard Content-Type, for example, "Content-Type: application/octet-stream". Standard PHP5 creates an array for "Content-Type: application/x-www-form-urlencoded" and "Content-Type: multipart/form-data".
+1. `unescape_request()` — Corrects the global arrays `$_GET`, `$_POST`, `$_COOKIE`, `$_REQUEST`, `$_FILES` decoded values from `%XX` and extended `%uXXXX` / `%u{XXXXXX}` format, for example, through an outdated JavaScript function `escape()`. Standard PHP5 cannot do it. Recode `$_GET`, `$_POST`, `$_COOKIE`, `$_REQUEST`, `$_FILES` from `$charset` encoding to UTF-8, if necessary. A side effect is a positive protection against XSS attacks with non-printable characters on the vulnerable PHP function. Thus web forms can be sent to the server in 2-encoding: `$charset` and UTF8. For example: `?тест[тест]=тест`
+If in the `HTTP_COOKIE` there are parameters with the same name, takes the last value (as in the `QUERY_STRING`), not the first. Creates an array of `$_POST` for non-standard Content-Type, for example, `"Content-Type: application/octet-stream"`. Standard PHP5 creates an array for `"Content-Type: application/x-www-form-urlencoded"` and `"Content-Type: multipart/form-data"`.
 
-Examples of unescape()
+Examples of `unescape()`
 
     '%D1%82%D0%B5%D1%81%D1%82'        => "\xD1\x82\xD0\xB5\xD1\x81\xD1\x82"  #binary (regular)
     '0xD182D0B5D181D182'              => "\xD1\x82\xD0\xB5\xD1\x81\xD1\x82"  #binary (compact)
     '%u0442%u0435%u0441%u0442'        => "\xD1\x82\xD0\xB5\xD1\x81\xD1\x82"  #UCS-2  (U+0 — U+FFFF)
     '%u{442}%u{435}%u{0441}%u{00442}' => "\xD1\x82\xD0\xB5\xD1\x81\xD1\x82"  #UTF-8  (U+0 — U+FFFFFF)
 
-Examples of unescape_request()
+Examples of `unescape_request()`
 
     '%F2%E5%F1%F2'                    => 'тест'  #CP1251 (regular)
     '0xF2E5F1F2'                      => 'тест'  #CP1251 (compact)
@@ -103,7 +101,7 @@ Examples of unescape_request()
 1. Возможность работы без PHP расширений ICONV и MBSTRING, если они есть, то активно используются! Используется наиболее быстрый из доступных методов между MBSTRING, ICONV, родной реализацией на PHP и хаками.
 1. Полезные функции, отсутствующие в ICONV и MBSTRING
 1. Методы, которые принимают и возвращают строку, умеют принимать и возвращать null. Это удобно при выборках значений из базы данных.
-1. Несколько методов умеют обрабатывать массивы рекурсивно: array_change_key_case(), convert_from(), convert_to(), strict(), is_utf8(), blocks_check(), convert_case(), lowercase(), uppercase(), unescape()
+1. Несколько методов умеют обрабатывать массивы рекурсивно: `array_change_key_case()`, `convert_from()`, `convert_to()`, `strict()`, `is_utf8()`, `blocks_check()`, `convert_case()`, `lowercase()`, `uppercase()`, `unescape()`
 1. Проверка у методов входных параметров на допустимые типы через рефлексию (можно отключить)
 1. Единый интерфейс и инкапсуляция, можно унаследоваться и переопределить методы
 1. Покрытие тестами
