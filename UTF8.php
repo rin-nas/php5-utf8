@@ -2703,6 +2703,27 @@ class UTF8
 	public static function is_utf8($data, $is_strict = true)
 	{
 		if (! ReflectionTypeHint::isValid()) return false;
+		if (is_string($data))
+		{
+			if (preg_match('~~suSX', $data) !== 1) return false;
+			//if (function_exists('preg_last_error') && preg_last_error() !== PREG_NO_ERROR) return false;
+			//preg_match('~~suSX') much faster (up to 4 times), then mb_check_encoding($data, 'UTF-8')!
+			//if (function_exists('mb_check_encoding') && ! mb_check_encoding($data, 'UTF-8')) return false; #DEPRECATED
+			/**
+			 * Специальные символы по спецификации JSON (http://json.org/)
+			 *   \b represents the backspace character (U+0008)
+			 *   \t represents the character tabulation character (U+0009)
+			 *   \n represents the line feed character (U+000A)
+			 *   \f represents the form feed character (U+000C)
+			 *   \r represents the carriage return character (U+000D)
+			 */
+			//с данным регулярным выражением preg_match() работает в 2 раза быстрее, чем strpbrk()
+			if ($is_strict && preg_match('/[^\x08\x09\x0A\x0C\x0D\x20-\xBF\xC2-\xF7]/sSX', $data)) {
+				return false;
+			}
+			return true;
+		}
+		if (is_scalar($data) || is_null($data)) return true;  #int/float/bool/null
 		if (is_array($data))
 		{
 			foreach ($data as $k => &$v)
@@ -2711,16 +2732,6 @@ class UTF8
 			}
 			return true;
 		}
-		if (is_string($data))
-		{
-			if (! preg_match('~~suSX', $data)) return false;
-			if (function_exists('preg_last_error') && preg_last_error() !== PREG_NO_ERROR) return false;
-			#preg_match('~~suSX') much faster (up to 4 times), then mb_check_encoding($data, 'UTF-8')!
-			#if (function_exists('mb_check_encoding') && ! mb_check_encoding($data, 'UTF-8')) return false; #DEPRECATED
-			if ($is_strict && preg_match('/[^\x09\x0A\x0D\x20-\xBF\xC2-\xF7]/sSX', $data)) return false;
-			return true;
-		}
-		if (is_scalar($data) || is_null($data)) return true;  #int/float/bool/null
 		return false; #object or resource
 	}
 
