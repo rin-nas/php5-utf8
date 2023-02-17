@@ -1,0 +1,28 @@
+; String to output after an error message. PHP's default behavior is to leave
+; this setting blank.
+; http://php.net/error-append-string
+; Example:
+;error_append_string = "</span>"
+ 
+error_prepend_string = "<!-- > \" ></script></title></head>-->
+            <script_error>
+            <noindex>
+            <div style=\"z-index:9999;
+                    position:relative;
+                    display: block;
+                    clear:both;
+                    float:left;
+                    border:1px dashed red;
+                    padding:5px;
+                    margin:5px;
+                    background:#fff;
+                    color:#000;
+                    font:normal 10pt monospace;
+                    text-align:left;\">
+            <pre>"
+ 
+error_append_string = "</pre>
+            </div>
+            <div style=\"clear:both;\"></div>
+            </noindex>
+            </script_error>"
